@@ -7,24 +7,43 @@
   <link rel="stylesheet" href="signup.css">
   <link rel="icon" href="images/career.ico">
   <script defer>
-    function validateForm(event) {
-      event.preventDefault();
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirm-password").value;
-      const errorText = document.getElementById("error-text");
+  async function validateForm(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+    const errorText = document.getElementById("error-text");
 
-      if (password !== confirmPassword) {
-        errorText.textContent = "❌ Passwords do not match!";
-        return false;
-      } else {
-        errorText.textContent = "";
-        // Submit form here (AJAX or form submission)
+    if (password !== confirmPassword) {
+      errorText.textContent = "❌ Passwords do not match!";
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, confirmPassword })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
         alert("✅ Account created successfully!");
         document.getElementById("signup-form").reset();
-        return true;
+        errorText.textContent = "";
+      } else {
+        errorText.textContent = "❌ " + result.msg;
+        console.error("Signup Error:", result.msg);
       }
+    } catch (error) {
+      errorText.textContent = "❌ Server error. Please try again later.";
+      console.error("Fetch Error:", error);
     }
-  </script>
+  }
+</script>
 </head>
 <body>
   <div class="signup-container">
