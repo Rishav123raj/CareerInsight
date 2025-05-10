@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CareerInsight - Sign In</title>
+  <link rel="stylesheet" href="signin.css" />
+  <link rel="icon" href="images/career.ico" />
+  <script defer>
+    async function handleSignIn(event) {
+      event.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const errorText = document.getElementById("error-text");
+
+      try {
+        const response = await fetch("http://localhost:5000/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert("✅ Login successful!");
+          window.location.href = "dashboard.html"; // update with your dashboard
+        } else {
+          errorText.textContent = "❌ " + data.message || "Login failed";
+        }
+      } catch (error) {
+        errorText.textContent = "❌ Server error. Try again later.";
+        console.error(error);
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="signin-container">
+    <div class="signin-box">
+      <h2>Welcome Back!</h2>
+      <p class="subtext">Login to your CareerInsight account</p>
+      <form id="signin-form" onsubmit="handleSignIn(event)">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required />
+        </div>
+        <p id="error-text"></p>
+        <button type="submit" class="signin-button">Sign In</button>
+      </form>
+      <p class="signup-link">Don't have an account? <a href="signup.html">Create one</a></p>
+    </div>
+  </div>
+</body>
+</html>
