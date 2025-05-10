@@ -1,0 +1,423 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+body{
+  background-color: rgb(219, 230, 240);
+  font-family: "Poppins", sans-serif;
+}
+
+.main{
+  width: 100%;
+  height: 100vh;
+}
+
+nav{
+  width: 100%;
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px;
+}
+
+.logo{
+  font-size: 18px;
+  color: rgb(10, 102, 194);
+}
+
+.nav-links ul{
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  font-size: 16px;
+}
+
+.nav-links a{
+  text-decoration: none;
+  color: black;
+}
+
+.btn{
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn button{
+  padding: 10px;
+  text-align: center;
+  border-radius: 5px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn #signUp{
+  color: white;
+  background-color: rgb(10, 102, 194);
+}
+
+.hero{
+  width: 100%;
+  height: calc(100vh-70px);
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.text-left{
+  width: 50%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.text-left h1{
+  font-size: 48px;
+  font-weight: 600;
+}
+
+.text-left p{
+  display: block;
+  font-size: 16px;
+  line-height: 28px;
+  margin-bottom: 20px;
+}
+
+.text-left #account{
+  color: white;
+  background-color: rgb(10, 102, 194);
+}
+
+.score-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  background-color: rgba(10, 102, 194, 0.6);
+  width: 40%;
+  height: 100%;
+  gap: 1.5rem;
+  padding: 20px;
+  margin-top: 20px;
+  margin-right: 40px;
+  border-radius: 5px;
+}
+
+.score-box{
+  background-color: #f9f9f9;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  text-align: center;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.score-box:hover {
+  transform: translateY(-5px);
+}
+
+.score-box h3 {
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.score-box p {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c7be5;
+}
+
+.score-box.employability {
+  background-color: #e7f3ff;
+  border-color: #2c7be5;
+  grid-column: span 2;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.career-section{
+  width: 100%;
+  height: 100vh;
+}
+
+.why-us{
+  width: 100%;
+  height: 60%;
+  background-color: white;
+  text-align: center;
+  padding-top: 20px;
+}
+
+.card-section{
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 20px;
+  margin: 20px;
+}
+
+.card{
+  width: 220px;
+  height: 230px;
+  background-color: #e7f3ff;
+  font-size: 15px;
+  line-height: 25px;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+
+.card i{
+  color: #2c7be5;
+  margin: 15px;
+  font-size: 30px;
+}
+
+.card h3{
+  font-size: 16px;
+  margin-top: 5px;
+}
+
+.card p{
+  margin: 10px;
+  color: rgb(16, 14, 14);
+}
+
+.join-us{
+  width: 100%;
+  height: 40%;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.join-us p{
+  padding: 10px;
+  margin: 20px;
+  line-height: 30px;
+}
+
+.btn #account{
+  color: white;
+  background-color: rgb(10, 102, 194);
+}
+
+/* footer */
+
+footer{
+  margin-top: 40px;
+  background-color: rgb(2, 20, 75);
+  color: #ccc;
+  padding: 40px 20px 20px;
+}
+
+.footer-container{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: auto;
+}
+
+.footer-right{
+  width: 70%;
+  display: flex;
+  justify-content: space-between;
+}
+
+footer h3{
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.footer-about,
+.footer-links,
+.footer-contact,
+.footer-company,
+.footer-social {
+  flex: 1 1 200px;
+  margin: 15px;
+}
+
+.footer-links ul{
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links ul li{
+  margin-bottom: 10px;
+}
+
+.footer-links ul li a{
+  color: #ccc;
+  text-decoration: none;
+}
+
+.footer-company ul{
+  list-style: none;
+  padding: 0;
+}
+
+.footer-company ul li{
+  margin-bottom: 10px;
+}
+
+.footer-company ul li a{
+  color: #ccc;
+  text-decoration: none;
+}
+
+.footer-contact p{
+  margin: 8px 0;
+}
+
+.social-icons a{
+  font-size: 30px;
+  margin-right: 10px;
+  color: #ccc;
+  text-decoration: none;
+}
+
+.social-icons a:hover {
+  color: #fff;
+}
+
+.footer-bottom {
+  text-align: center;
+  padding: 15px 0;
+  border-top: 1px solid #444;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+/* settings section */
+/* important */
+.form-section {
+  display: none;
+}
+
+.form-section.active {
+  display: block;
+}
+
+.container{
+  background-color: red;
+  padding: 20px;
+}
+
+.setting-section{
+  background-color: pink;
+  margin: auto;
+  margin-top: 10px;
+  padding: 20px;
+  width: 900px;
+}
+
+.setting-items{
+  background-color: yellow;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+.setting-items button{
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 20px;
+  border: none;
+}
+
+.form-section{
+  background-color: #fff;
+  padding: 20px;
+}
+
+.form-section p{
+  font-size: 12px;
+}
+
+form{
+  margin: 20px;
+  font-size: 20px;
+}
+
+/* Connect - account */
+
+.connect-cards{
+  padding-top: 10px;
+  background-color: red;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.connect-card{
+  background-color: pink;
+  padding: 20px;
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+
+
+/* toggle button */
+
+.switch{
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input{
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider{
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before{
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider{
+  background-color: #2196F3;
+}
+
+input:checked + .slider:before{
+  transform: translateX(26px);
+}

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareerInsight</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+<body>
+  <div class="main">
+
+    <!-- navbar -->
+
+    <nav>
+      <div class="logo">
+        <h1>CareerInsight</h1>
+      </div>
+      <div class="nav-links">
+        <ul>
+          <li><a href="#">Dashboard</a></li>
+          <li><a href="#">Analytics</a></li>
+          <li><a href="#">Career Predictor</a></li>
+          <li><a href="settings.html">Settings</a></li>
+        </ul>
+      </div>
+      <div class="btn">
+        <button id="signIn">Sign In</button>
+        <button id="signUp">Sign up</button>
+      </div>
+    </nav>
+
+
+    <!-- Home Page -->
+
+     <div class="container">
+      <h2>Settings</h2>
+      <div class="setting-section">
+        <div class="setting-items">
+          <button onclick="showSection('profile')">Profile</button>
+          <button onclick="showSection('connect-account')">Connected Accounts</button>
+          <button onclick="showSection('notify')">Notifications</button>
+        </div>
+        
+        <div id="profile" class="form-section">
+          <h3>Personal Information</h3>
+          <p>Manage your personal details and profile information</p>
+          <form>
+            <div class="name-section">
+              <label for="fname">Full Name</label>
+              <input type="text" id="name" placeholder="">
+              <label for="lname">Last Name</label>
+              <input type="text" id="name" placeholder="">
+            </div>
+            <div class="details">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder=""/><br>
+              <label for="college">University/College</label>
+              <input type="text" id="college" placeholder=""><br>
+              <label for="major">Major/Specialization</label>
+              <input type="text" id="major" placeholder=""><br>
+              <label for="year">Graduation Year</label>
+              <input type="text" id="year" placeholder="">
+            </div>
+            <div class="btn">
+              <button>Save Changes</button>
+            </div>
+          </form>
+          <div class="change">
+            <h3>Change Password</h3>
+            <p>Update your password to keep your account secure</p>
+            <form>
+              <div class="password-section">
+                <label for="curr-pass">Current Password</label>
+                <input type="password" id="curr-pass" placeholder="">
+                <label for="new-pass">New Password</label>
+                <input type="password" id="new-pass" placeholder="">
+                <label for="curr-pass">Confirm New Password</label>
+                <input type="password" id="conf-pass" placeholder="">
+              </div>
+              <div class="btn">
+                <button>Update Password</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div id="connect-account" class="form-section">
+          <h3>Connected Accounts</h3>
+          <p>Connect your accounts to enhance your analytics and insights</p>
+          <div class="connect-cards">
+            <div class="connect-card">
+              <i class="fa-brands fa-github"></i>
+              <div class="text">
+                <h5>Github</h5>
+                <p>Connect to track your coding activity</p>
+              </div>
+              <div class="btn">
+                <button>Connect</button>
+              </div>
+            </div>
+            <div class="connect-card">
+                <i class="fa-solid fa-code"></i>
+                <div class="text">
+                <h5>LeetCode</h5>
+                <p>Connect to track your coding challenge progress</p>
+              </div>              
+              <div class="btn">
+                <button>Connect</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="notify" class="form-section">
+          <h3>Notification Settings</h3>
+          <p>Manage how and when we notify you</p>
+          <div class="notify-cards">
+            <div class="notify-card">
+              <h5>Email Notifications</h5>
+              <p>Receive updates and insights via email</p>
+              <div class="toggle-btn">
+                <label class="switch">
+                  <input type="checkbox" id="toggleSwitch">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="notify-card">
+              <h5>Email Notifications</h5>
+              <p>Receive updates and insights via email</p>
+              <div class="toggle-btn">
+                <label class="switch">
+                  <input type="checkbox" id="toggleSwitch">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="notify-card">
+              <h5>Weekly Progress Reports</h5>
+              <p>Get a summary of your weekly progress</p>
+              <div class="toggle-btn">
+                <label class="switch">
+                  <input type="checkbox" id="toggleSwitch">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="notify-card">
+              <h5>Career Opportunity Alerts</h5>
+              <p>Be notified of relevant career opportunities</p>
+              <div class="toggle-btn">
+                <label class="switch">
+                  <input type="checkbox" id="toggleSwitch">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="notify-card">
+              <h5>Skill Gap Notifications</h5>
+              <p>Alerts when new skill gaps are identified</p>
+              <div class="toggle-btn">
+                <label class="switch">
+                  <input type="checkbox" id="toggleSwitch">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="notify-card">
+              <h5>Newsletter</h5>
+              <p>Monthly newsletter with industry insights</p>
+              <div class="toggle-btn">
+                <label class="switch">
+                  <input type="checkbox" id="toggleSwitch">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="btn">
+            <button>Save Preferences</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
