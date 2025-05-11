@@ -31,6 +31,7 @@
       const result = await response.json();
 
       if (response.ok) {
+        localStorage.setItem("userName", name); // Store name
         alert("✅ Account created successfully!");
         document.getElementById("signup-form").reset();
         errorText.textContent = "";

@@ -9,6 +9,7 @@
   <script defer>
     async function handleSignIn(event) {
       event.preventDefault();
+      const userName = document.getElementById("userName").value;
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const errorText = document.getElementById("error-text");
@@ -19,12 +20,13 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ userName, email, password }),
         });
 
         const data = await response.json();
 
         if (response.ok) {
+          localStorage.setItem("userName", name);
           alert("✅ Login successful!");
           window.location.href = "dashboard.html"; // update with your dashboard
         } else {
@@ -43,6 +45,10 @@
       <h2>Welcome Back!</h2>
       <p class="subtext">Login to your CareerInsight account</p>
       <form id="signin-form" onsubmit="handleSignIn(event)">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="userName" name="userName" placeholder="Enter your name" required />
+        </div>
         <div class="form-group">
           <label for="email">Email Address</label>
           <input type="email" id="email" name="email" placeholder="Enter your email" required />

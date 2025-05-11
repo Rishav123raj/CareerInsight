@@ -1,4 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Handle Welcome Message
+  const name = localStorage.getItem("userName");
+  if (name) {
+    const welcomeText = document.getElementById("welcome-text");
+    if (welcomeText) {
+      welcomeText.textContent = `Welcome back, ${name}`;
+    }
+  }
+    // Handle Logout Modal
   const logoutBtn = document.getElementById("logoutBtn");
   const logoutModal = document.getElementById("logoutModal");
   const confirmLogout = document.getElementById("confirmLogout");
@@ -22,3 +31,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
