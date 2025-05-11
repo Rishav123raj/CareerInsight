@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CareerInsight</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="icon" href="images/career.ico" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+      <div class="brand">
+        <h3>CareerInsight</h3>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="#"><i class="fas fa-home"></i> Dashboard</a></li>
+        <li><a href="#"><i class="fas fa-chart-line"></i> Analytics</a></li>
+        <li><a href="#"><i class="fas fa-briefcase"></i> Career Predictor</a></li>
+        <li><a href="#"><i class="fas fa-laptop-code"></i> Projects</a></li>
+        <li><a href="#"><i class="fas fa-cogs"></i> Settings</a></li>
+      </ul>
+      <div class="profile-dropdown">
+        <button class="profile-btn"><i class="fas fa-user-circle"></i> Profile <i class="fas fa-caret-down"></i></button>
+        <ul class="dropdown-content">
+          <li><a href="#">View Profile</a></li>
+          <li><a href="#">Edit Profile</a></li>
+          <li><a href="#" id="logoutBtn">Logout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="dashboard-header">
+        <h1>Welcome Back, Student!</h1>
+        <p>Here's a summary of your career insights:</p>
+      </header>
+
+      <section class="widgets">
+        <div class="widget employability">
+          <h3>Employability Score</h3>
+          <p>85%</p>
+        </div>
+        <div class="widget technical">
+          <h3>Technical Skills</h3>
+          <p>92%</p>
+        </div>
+        <div class="widget academics">
+          <h3>Academic Score</h3>
+          <p>88%</p>
+        </div>
+        <div class="widget social">
+          <h3>Social Presence</h3>
+          <p>78%</p>
+        </div>
+        <div class="widget projects">
+          <h3>Project Portfolio</h3>
+          <p>5 Completed</p>
+        </div>
+      </section>
+
+      <section class="quick-links">
+        <h2>Quick Actions</h2>
+        <div class="actions">
+          <a href="#"><i class="fas fa-upload"></i> Upload Resume</a>
+          <a href="#"><i class="fas fa-code-branch"></i> Sync GitHub</a>
+          <a href="#"><i class="fas fa-code"></i> Update LeetCode Stats</a>
+          <a href="#"><i class="fas fa-user-edit"></i> Update LinkedIn Profile</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="modal">
+    <div class="modal-content">
+      <h3>Are you sure you want to logout?</h3>
+      <div class="modal-buttons">
+        <button id="confirmLogout">Yes</button>
+        <button id="cancelLogout">No</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link External JS -->
+  <script src="dashboard.js"></script>
+</body>
+</html>
