@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CareerInsight - Student Profile</title>
+  <link rel="stylesheet" href="profile.css" />
+  <link rel="icon" href="images/career.ico" />
+</head>
+<body>
+
+  <div class="profile-container">
+    <header class="profile-header">
+      <h1>Welcome to Your CareerInsight Profile</h1>
+      <p>Here’s an overview of your academic journey and career insights.</p>
+    </header>
+
+    <div class="profile-card">
+  <div class="profile-image">
+    <!-- Upload Input -->
+    <div class="form-group">
+      <label for="image">Upload Profile Picture</label>
+      <input type="file" id="image" accept="image/*" />
+    </div>
+
+    <!-- Preview Area -->
+    <div class="form-group">
+      <img id="preview" src="images/default-avatar.png" alt="Profile Preview" style="max-width: 150px; margin-top: 10px;" />
+    </div>
+  </div>
+</div>
+
+      <div class="profile-details">
+        <h2>Your Information</h2>
+        <form id="profile-form">
+          <div class="form-group">
+            <label for="fullName">Full Name:</label>
+            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required />
+          </div>
+
+          <div class="form-group">
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" name="dob" required />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email address" required />
+          </div>
+
+          <div class="form-group">
+            <label for="contactNumber">Phone Number:</label>
+            <input type="tel" id="contactNumber" name="contactNumber" placeholder="Enter your contact number" />
+          </div>
+
+          <h3>Academic Details</h3>
+          <div class="form-group">
+            <label for="degreeProgram">Degree Program:</label>
+            <input type="text" id="degreeProgram" name="degreeProgram" placeholder="Enter your degree program" required />
+          </div>
+
+          <div class="form-group">
+            <label for="fieldOfStudy">Field of Study:</label>
+            <input type="text" id="fieldOfStudy" name="fieldOfStudy" placeholder="Enter your field of study" required />
+          </div>
+
+          <div class="form-group">
+            <label for="university">University/College:</label>
+            <input type="text" id="university" name="university" placeholder="Enter your university/college" required />
+          </div>
+
+          <div class="form-group">
+            <label for="cgpa">CGPA/Percentage:</label>
+            <input type="number" id="cgpa" name="cgpa" step="0.01" placeholder="Enter your CGPA/Percentage" required />
+          </div>
+
+          <div class="form-group">
+            <label for="graduationYear">Expected Graduation Year:</label>
+            <input type="number" id="graduationYear" name="graduationYear" placeholder="Enter your expected graduation year" required />
+          </div>
+
+          <h3>Skills & Interests</h3>
+          <div class="form-group">
+            <label for="skills">Skills (e.g., Java, Python):</label>
+            <input type="text" id="skills" name="skills" placeholder="Enter your skills" required />
+          </div>
+
+          <div class="form-group">
+            <label for="careerGoals">Career Goals:</label>
+            <textarea id="careerGoals" name="careerGoals" placeholder="Describe your career goals" rows="4" required></textarea>
+          </div>
+
+          <h3>Online Presence</h3>
+          <div class="form-group">
+            <label for="linkedin">LinkedIn Profile:</label>
+            <input type="url" id="linkedin" name="linkedin" placeholder="Enter your LinkedIn profile URL" />
+          </div>
+
+          <div class="form-group">
+            <label for="github">GitHub/Portfolio:</label>
+            <input type="url" id="github" name="github" placeholder="Enter your GitHub/Portfolio URL" />
+          </div>
+
+          <button type="submit" class="save-btn">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer class="profile-footer">
+    <p>&copy; 2025 CareerInsight. All rights reserved.</p>
+  </footer>
+  <script src="profile.js"></script>
+</body>
+</html>
