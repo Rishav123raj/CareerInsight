@@ -55,7 +55,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     });
 
     await newProfile.save();
-    res.status(201).json({ message: 'Profile created successfully' });
+    res.status(201).json({ message: 'Profile created successfully', profile: newProfile });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
