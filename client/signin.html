@@ -26,9 +26,9 @@
         const data = await response.json();
 
         if (response.ok) {
-          localStorage.setItem("userName", name);
+          localStorage.setItem("userName", userName);
           alert("✅ Login successful!");
-          window.location.href = "dashboard.html"; // update with your dashboard
+          window.location.href = "dashboard.html"; 
         } else {
           errorText.textContent = "❌ " + data.message || "Login failed";
         }
