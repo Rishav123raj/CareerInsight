@@ -3,6 +3,7 @@ const multer = require("multer");
 const path = require("path");
 const router = express.Router();
 const StudentProfile = require('../models/StudentProfile');
+const authMiddleware = require('../middleware/authMiddleware');
 
 // Storage configuration
 const storage = multer.diskStorage({
@@ -15,9 +16,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
 // Route
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     const {
       fullName,
