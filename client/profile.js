@@ -22,6 +22,10 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
     const response = await fetch("http://localhost:5000/api/profile", {
       method: "POST",
       body: formData,
+      withCredentials: true, // send cookies
+      headers: {
+        'Content-Type': 'multipart/form-data'
+        }
     });
 
     const data = await response.json();
