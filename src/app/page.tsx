@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -28,12 +29,37 @@ import {
   Gauge,
   RotateCcw,
   Linkedin,
+  Github,
+  Activity, // Using Activity for LeetCode icon
+  BarChart3,
+  LineChart as LineChartIcon,
+  Package,
 } from 'lucide-react';
-import type { ProfileFormData, CareerRecommendation, CareerPathway, EmployabilityScore } from '@/lib/types';
+import type {
+  ProfileFormData,
+  CareerRecommendation,
+  CareerPathway,
+  EmployabilityScore,
+  GitHubAnalyticsData,
+  LeetCodeAnalyticsData,
+  CommitHistoryData,
+  LeetCodeDifficultyData,
+  LeetCodeDailyActivityData,
+} from '@/lib/types';
 import { generateCareerRecommendations } from '@/ai/flows/generate-career-recommendations';
 import { suggestCareerPathways } from '@/ai/flows/suggest-career-pathways';
 import { calculateEmployabilityScore } from '@/ai/flows/calculate-employability-score';
 import { cn } from '@/lib/utils';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig
+} from "@/components/ui/chart";
+import { Bar, BarChart, Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from 'recharts';
+
 
 const profileFormSchema = z.object({
   academic: z.object({
@@ -83,12 +109,66 @@ const defaultProfileValues: ProfileFormData = {
   linkedinProfile: "",
 };
 
+// Simulated data fetching functions
+const simulateGitHubFetch = async (username: string): Promise<GitHubAnalyticsData> => {
+  await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+  if (!username) return { commitHistory: [], repoCount: 0 };
+  // Simulate some commit history for the last 6 months
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+  const commitHistory: CommitHistoryData[] = months.map(month => ({
+    month,
+    commits: Math.floor(Math.random() * 50) + 5,
+  }));
+  return {
+    commitHistory,
+    repoCount: Math.floor(Math.random() * 20) + 1,
+  };
+};
+
+const simulateLeetCodeFetch = async (username: string): Promise<LeetCodeAnalyticsData> => {
+  await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+  if (!username) return { totalSolved: 0, solvedByDifficulty: [], dailyActivity: [] };
+  const totalSolved = Math.floor(Math.random() * 500) + 50;
+  const easySolved = Math.floor(totalSolved * (Math.random() * 0.4 + 0.3)); // 30-70% Easy
+  const mediumSolved = Math.floor(totalSolved * (Math.random() * 0.3 + 0.2)); // 20-50% Medium
+  const hardSolved = totalSolved - easySolved - mediumSolved > 0 ? totalSolved - easySolved - mediumSolved : 0;
+
+  const solvedByDifficulty: LeetCodeDifficultyData[] = [
+    { level: 'Easy', solved: easySolved },
+    { level: 'Medium', solved: mediumSolved },
+    { level: 'Hard', solved: hardSolved },
+  ];
+
+  // Simulate daily activity for the last 7 days
+  const dailyActivity: LeetCodeDailyActivityData[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    dailyActivity.push({
+      date: date.toISOString().split('T')[0], // YYYY-MM-DD
+      solved: Math.floor(Math.random() * 5), // 0-4 problems solved per day
+    });
+  }
+
+  return {
+    totalSolved,
+    solvedByDifficulty,
+    dailyActivity,
+  };
+};
+
+
 export default function DashboardPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
   const [recommendations, setRecommendations] = useState<CareerRecommendation | null>(null);
   const [pathways, setPathways] = useState<CareerPathway | null>(null);
   const [employabilityScore, setEmployabilityScore] = useState<EmployabilityScore | null>(null);
+  const [gitHubData, setGitHubData] = useState<GitHubAnalyticsData | null>(null);
+  const [leetCodeData, setLeetCodeData] = useState<LeetCodeAnalyticsData | null>(null);
+  const [githubUsernameForAnalytics, setGithubUsernameForAnalytics] = useState<string | null>(null);
+  const [leetcodeUsernameForAnalytics, setLeetcodeUsernameForAnalytics] = useState<string | null>(null);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
@@ -99,29 +179,34 @@ export default function DashboardPage() {
 
   const onSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
+    setIsLoadingAnalytics(true);
     setRecommendations(null);
     setPathways(null);
     setEmployabilityScore(null);
+    setGitHubData(null);
+    setLeetCodeData(null);
+    setGithubUsernameForAnalytics(data.coding.githubUsername || null);
+    setLeetcodeUsernameForAnalytics(data.coding.codingPlatformUsername || null);
 
     const academicPerformanceSummary = `CGPA: ${data.academic.cgpa}, Major: ${data.academic.major}. Strengths: ${data.academic.academicStrengths}. Weaknesses: ${data.academic.academicWeaknesses}.`;
     const codingSkillsSummary = `Languages & Frameworks: ${data.coding.programmingLanguages}. Notable Projects: ${data.coding.keyProjects}. GitHub: ${data.coding.githubUsername || 'N/A'}. Coding Platform (${data.coding.codingPlatformUsername || 'N/A'}): ${data.coding.codingPlatformStats || 'N/A'}.`;
     const extracurricularActivitiesSummary = `Certifications: ${data.extracurricular.certifications || 'N/A'}. Events: ${data.extracurricular.eventsParticipated || 'N/A'}. Hackathons: ${data.extracurricular.hackathonExperience || 'N/A'}. Leadership: ${data.extracurricular.leadershipRoles || 'N/A'}.`;
     
-    // Summaries for Employability Score Calculation
     const technicalAndProgrammingSkillsSummary = `Programming Languages: ${data.coding.programmingLanguages}. Key Projects: ${data.coding.keyProjects}. General Skills: ${data.skills}.`;
     const professionalNetworkingSummary = `LinkedIn Profile: ${data.linkedinProfile || 'N/A'}.`;
     const problemSolvingSkillsSummary = `GitHub: ${data.coding.githubUsername || 'N/A'} (Activity/Repositories should be inferred from description if available). Coding Platform (${data.coding.codingPlatformUsername || 'N/A'}): ${data.coding.codingPlatformStats || 'N/A'}.`;
     
     try {
+      // AI Insights
       const [recs, paths, scoreOutput] = await Promise.all([
         generateCareerRecommendations({
           academicPerformance: academicPerformanceSummary,
-          codingSkills: codingSkillsSummary, // This summary is slightly different from technicalAndProgrammingSkillsSummary
+          codingSkills: codingSkillsSummary,
           extracurricularActivities: extracurricularActivitiesSummary,
         }),
         suggestCareerPathways({
           academicPerformance: academicPerformanceSummary,
-          codingStats: problemSolvingSkillsSummary, // Using the more detailed summary here
+          codingStats: problemSolvingSkillsSummary,
           extracurricularActivities: extracurricularActivitiesSummary,
           skills: data.skills,
         }),
@@ -137,22 +222,50 @@ export default function DashboardPage() {
       setRecommendations(recs);
       setPathways(paths);
       setEmployabilityScore(scoreOutput);
+      setIsLoading(false); // AI insights loaded
 
       toast({
-        title: "Insights Generated!",
+        title: "AI Insights Generated!",
         description: "Your personalized recommendations, career pathways, and employability score are ready.",
       });
+
+      // Analytics Data (Simulated)
+      const analyticsPromises = [];
+      if (data.coding.githubUsername) {
+        analyticsPromises.push(simulateGitHubFetch(data.coding.githubUsername).then(setGitHubData));
+      }
+      if (data.coding.codingPlatformUsername) {
+        analyticsPromises.push(simulateLeetCodeFetch(data.coding.codingPlatformUsername).then(setLeetCodeData));
+      }
+      await Promise.all(analyticsPromises);
+
     } catch (error) {
-      console.error("AI processing error:", error);
+      console.error("Processing error:", error);
       toast({
         variant: "destructive",
-        title: "Error Generating Insights",
+        title: "Error Generating Insights or Analytics",
         description: "An error occurred while processing your request. Please try again.",
       });
-    } finally {
       setIsLoading(false);
+    } finally {
+      setIsLoadingAnalytics(false); // Analytics loaded or failed
     }
   };
+
+  const gitHubCommitChartConfig = {
+    commits: { label: "Commits", color: "hsl(var(--chart-1))" },
+  } satisfies ChartConfig;
+
+  const leetCodeDifficultyChartConfig = {
+    easy: { label: "Easy", color: "hsl(var(--chart-2))" },
+    medium: { label: "Medium", color: "hsl(var(--chart-3))" },
+    hard: { label: "Hard", color: "hsl(var(--chart-4))" },
+  } satisfies ChartConfig;
+
+  const leetCodeActivityChartConfig = {
+    solved: { label: "Problems Solved", color: "hsl(var(--chart-5))" },
+  } satisfies ChartConfig;
+
 
   return (
     <div className="space-y-8">
@@ -186,8 +299,8 @@ export default function DashboardPage() {
                 <CardDescription>Detail your coding skills, projects, and online presence.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField name="coding.githubUsername" label="GitHub Username (Optional)" placeholder="your-github-username" />
-                <FormField name="coding.codingPlatformUsername" label="Coding Platform Username (Optional)" placeholder="e.g., LeetCode username" />
+                <FormField name="coding.githubUsername" label="GitHub Username (Optional)" placeholder="your-github-username" icon={<Github className="text-primary h-4 w-4" />} />
+                <FormField name="coding.codingPlatformUsername" label="Coding Platform Username (Optional)" placeholder="e.g., LeetCode username" icon={<Activity className="text-primary h-4 w-4" />} />
                 <FormField name="linkedinProfile" label="LinkedIn Profile URL (Optional)" placeholder="https://linkedin.com/in/yourprofile" error={errors.linkedinProfile} icon={<Linkedin className="text-primary h-4 w-4" />} />
                 <FormField name="coding.programmingLanguages" label="Programming Languages" placeholder="e.g., Python, Java, JavaScript" error={errors.coding?.programmingLanguages}/>
                 <FormTextareaField name="coding.keyProjects" label="Key Projects" placeholder="Describe 1-2 significant projects" error={errors.coding?.keyProjects}/>
@@ -222,20 +335,24 @@ export default function DashboardPage() {
             </Card>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button type="submit" disabled={isLoading} className="w-full sm:w-auto flex-grow text-base py-6">
-                {isLoading ? (
+              <Button type="submit" disabled={isLoading || isLoadingAnalytics} className="w-full sm:w-auto flex-grow text-base py-6">
+                {(isLoading || isLoadingAnalytics) ? (
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 ) : (
                   <Sparkles className="mr-2 h-5 w-5" />
                 )}
-                Generate AI Insights
+                Generate AI Insights & Analytics
               </Button>
               <Button type="button" variant="outline" onClick={() => {
                 reset(defaultProfileValues);
                 setRecommendations(null);
                 setPathways(null);
                 setEmployabilityScore(null);
-                }} disabled={isLoading} className="w-full sm:w-auto text-base py-6">
+                setGitHubData(null);
+                setLeetCodeData(null);
+                setGithubUsernameForAnalytics(null);
+                setLeetcodeUsernameForAnalytics(null);
+                }} disabled={isLoading || isLoadingAnalytics} className="w-full sm:w-auto text-base py-6">
                 <RotateCcw className="mr-2 h-5 w-5" />
                 Reset Form
               </Button>
@@ -245,7 +362,7 @@ export default function DashboardPage() {
       </form>
 
       {/* Results Section */}
-      {(isLoading || employabilityScore || recommendations || pathways) && (
+      {(isLoading || isLoadingAnalytics || employabilityScore || recommendations || pathways || gitHubData || leetCodeData) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
           {isLoading && !employabilityScore && (
             <Card className="shadow-lg animate-pulse">
@@ -307,7 +424,7 @@ export default function DashboardPage() {
               </Card>
           )}
           {pathways && (
-            <Card className={`shadow-lg ${employabilityScore && recommendations ? 'col-span-1 md:col-span-2' : 'col-span-1'}`}>
+             <Card className={`shadow-lg ${employabilityScore && recommendations ? 'col-span-1 md:col-span-2' : 'col-span-1'}`}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Waypoints className="text-accent" /> Career Pathway Suggestions</CardTitle>
               </CardHeader>
@@ -327,6 +444,93 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           )}
+
+          {/* GitHub Analytics Section */}
+          {githubUsernameForAnalytics && (
+            isLoadingAnalytics && !gitHubData ? (
+              <Card className="shadow-lg animate-pulse">
+                <CardHeader><CardTitle className="flex items-center gap-2"><Github className="text-accent" /> GitHub Analytics for {githubUsernameForAnalytics}</CardTitle></CardHeader>
+                <CardContent className="h-[300px] flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></CardContent>
+              </Card>
+            ) : gitHubData && (
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Github className="text-accent" /> GitHub Analytics for {githubUsernameForAnalytics}</CardTitle>
+                  <CardDescription>Simulated commit history and repository count.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center gap-2">
+                    <Package className="text-primary h-6 w-6" />
+                    <p className="text-2xl font-semibold">{gitHubData.repoCount} <span className="text-sm text-muted-foreground">Repositories</span></p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2 flex items-center gap-2"><BarChart3 className="text-primary h-5 w-5" />Commit History (Last 6 Months)</h4>
+                    <ChartContainer config={gitHubCommitChartConfig} className="h-[250px] w-full">
+                      <BarChart accessibilityLayer data={gitHubData.commitHistory} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
+                        <YAxis tickLine={false} axisLine={false} tickMargin={10} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Legend content={<ChartLegendContent />} />
+                        <Bar dataKey="commits" fill="var(--color-commits)" radius={4} />
+                      </BarChart>
+                    </ChartContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          )}
+
+          {/* LeetCode Analytics Section */}
+          {leetcodeUsernameForAnalytics && (
+            isLoadingAnalytics && !leetCodeData ? (
+              <Card className="shadow-lg animate-pulse">
+                <CardHeader><CardTitle className="flex items-center gap-2"><Activity className="text-accent" /> Coding Platform Analytics for {leetcodeUsernameForAnalytics}</CardTitle></CardHeader>
+                <CardContent className="h-[400px] flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></CardContent>
+              </Card>
+            ) : leetCodeData && (
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Activity className="text-accent" /> Coding Platform Analytics for {leetcodeUsernameForAnalytics}</CardTitle>
+                  <CardDescription>Simulated problem solving statistics.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                   <p className="text-2xl font-semibold">{leetCodeData.totalSolved} <span className="text-sm text-muted-foreground">Total Problems Solved</span></p>
+                  <div>
+                    <h4 className="font-medium mb-2 flex items-center gap-2"><BarChart3 className="text-primary h-5 w-5" />Solved by Difficulty</h4>
+                    <ChartContainer config={leetCodeDifficultyChartConfig} className="h-[250px] w-full">
+                      <BarChart accessibilityLayer data={leetCodeData.solvedByDifficulty} layout="vertical" margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+                        <CartesianGrid horizontal={false} />
+                        <XAxis type="number" tickLine={false} axisLine={false} />
+                        <YAxis dataKey="level" type="category" tickLine={false} axisLine={false} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Legend content={<ChartLegendContent />} />
+                        <Bar dataKey="solved" radius={4}>
+                          {leetCodeData.solvedByDifficulty.map((entry, index) => (
+                             <div key={`cell-${index}`} style={{ backgroundColor: entry.level === 'Easy' ? 'hsl(var(--chart-2))' : entry.level === 'Medium' ? 'hsl(var(--chart-3))' : 'hsl(var(--chart-4))' }} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ChartContainer>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2 flex items-center gap-2"><LineChartIcon className="text-primary h-5 w-5" />Daily Activity (Last 7 Days)</h4>
+                    <ChartContainer config={leetCodeActivityChartConfig} className="h-[250px] w-full">
+                      <LineChart accessibilityLayer data={leetCodeData.dailyActivity} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="date" tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} tickLine={false} axisLine={false} tickMargin={10} />
+                        <YAxis tickLine={false} axisLine={false} tickMargin={10} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Legend content={<ChartLegendContent />} />
+                        <Line type="monotone" dataKey="solved" stroke="var(--color-solved)" strokeWidth={2} dot={{ r: 4, fill: "var(--color-solved)" }} activeDot={{ r: 6 }}/>
+                      </LineChart>
+                    </ChartContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          )}
+
         </div>
       )}
     </div>
@@ -374,3 +578,4 @@ export default function DashboardPage() {
     );
   }
 }
+

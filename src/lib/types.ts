@@ -1,3 +1,4 @@
+
 export interface AcademicData {
   cgpa: string;
   major: string;
@@ -43,4 +44,32 @@ export interface CareerPathway {
 export interface EmployabilityScore {
   score: number; // Score out of 100
   feedback?: string; // Optional brief feedback on the score
+}
+
+// For Analytics Graphs
+export interface CommitHistoryData {
+  month: string;
+  commits: number;
+}
+
+export interface GitHubAnalyticsData {
+  commitHistory: CommitHistoryData[];
+  repoCount: number;
+  // Could add more fields like languages, stars, etc. in a real implementation
+}
+
+export interface LeetCodeDifficultyData {
+  level: 'Easy' | 'Medium' | 'Hard';
+  solved: number;
+}
+
+export interface LeetCodeDailyActivityData {
+  date: string; // e.g., 'YYYY-MM-DD'
+  solved: number;
+}
+
+export interface LeetCodeAnalyticsData {
+  totalSolved: number;
+  solvedByDifficulty: LeetCodeDifficultyData[];
+  dailyActivity: LeetCodeDailyActivityData[];
 }
