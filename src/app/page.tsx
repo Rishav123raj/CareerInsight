@@ -27,10 +27,13 @@ import {
   Loader2,
   Gauge,
   RotateCcw,
+  Linkedin,
 } from 'lucide-react';
-import type { ProfileFormData, CareerRecommendation, CareerPathway } from '@/lib/types';
+import type { ProfileFormData, CareerRecommendation, CareerPathway, EmployabilityScore } from '@/lib/types';
 import { generateCareerRecommendations } from '@/ai/flows/generate-career-recommendations';
 import { suggestCareerPathways } from '@/ai/flows/suggest-career-pathways';
+import { calculateEmployabilityScore } from '@/ai/flows/calculate-employability-score';
+import { cn } from '@/lib/utils';
 
 const profileFormSchema = z.object({
   academic: z.object({
@@ -53,6 +56,7 @@ const profileFormSchema = z.object({
     leadershipRoles: z.string().optional(),
   }),
   skills: z.string().min(1, "Skills are required (comma-separated)"),
+  linkedinProfile: z.string().url("Please enter a valid LinkedIn profile URL (e.g., https://linkedin.com/in/username)").optional().or(z.literal("")),
 });
 
 const defaultProfileValues: ProfileFormData = {
@@ -76,6 +80,7 @@ const defaultProfileValues: ProfileFormData = {
     leadershipRoles: "",
   },
   skills: "",
+  linkedinProfile: "",
 };
 
 export default function DashboardPage() {
@@ -83,6 +88,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<CareerRecommendation | null>(null);
   const [pathways, setPathways] = useState<CareerPathway | null>(null);
+  const [employabilityScore, setEmployabilityScore] = useState<EmployabilityScore | null>(null);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
@@ -95,33 +101,46 @@ export default function DashboardPage() {
     setIsLoading(true);
     setRecommendations(null);
     setPathways(null);
+    setEmployabilityScore(null);
 
     const academicPerformanceSummary = `CGPA: ${data.academic.cgpa}, Major: ${data.academic.major}. Strengths: ${data.academic.academicStrengths}. Weaknesses: ${data.academic.academicWeaknesses}.`;
     const codingSkillsSummary = `Languages & Frameworks: ${data.coding.programmingLanguages}. Notable Projects: ${data.coding.keyProjects}. GitHub: ${data.coding.githubUsername || 'N/A'}. Coding Platform (${data.coding.codingPlatformUsername || 'N/A'}): ${data.coding.codingPlatformStats || 'N/A'}.`;
     const extracurricularActivitiesSummary = `Certifications: ${data.extracurricular.certifications || 'N/A'}. Events: ${data.extracurricular.eventsParticipated || 'N/A'}. Hackathons: ${data.extracurricular.hackathonExperience || 'N/A'}. Leadership: ${data.extracurricular.leadershipRoles || 'N/A'}.`;
-    const codingStatsSummary = `GitHub: ${data.coding.githubUsername || 'N/A'}. Platform (${data.coding.codingPlatformUsername || 'N/A'}) Stats: ${data.coding.codingPlatformStats || 'N/A'}. Languages: ${data.coding.programmingLanguages}. Key Projects: ${data.coding.keyProjects}.`;
-
+    
+    // Summaries for Employability Score Calculation
+    const technicalAndProgrammingSkillsSummary = `Programming Languages: ${data.coding.programmingLanguages}. Key Projects: ${data.coding.keyProjects}. General Skills: ${data.skills}.`;
+    const professionalNetworkingSummary = `LinkedIn Profile: ${data.linkedinProfile || 'N/A'}.`;
+    const problemSolvingSkillsSummary = `GitHub: ${data.coding.githubUsername || 'N/A'} (Activity/Repositories should be inferred from description if available). Coding Platform (${data.coding.codingPlatformUsername || 'N/A'}): ${data.coding.codingPlatformStats || 'N/A'}.`;
+    
     try {
-      const [recs, paths] = await Promise.all([
+      const [recs, paths, scoreOutput] = await Promise.all([
         generateCareerRecommendations({
           academicPerformance: academicPerformanceSummary,
-          codingSkills: codingSkillsSummary,
+          codingSkills: codingSkillsSummary, // This summary is slightly different from technicalAndProgrammingSkillsSummary
           extracurricularActivities: extracurricularActivitiesSummary,
         }),
         suggestCareerPathways({
           academicPerformance: academicPerformanceSummary,
-          codingStats: codingStatsSummary,
+          codingStats: problemSolvingSkillsSummary, // Using the more detailed summary here
           extracurricularActivities: extracurricularActivitiesSummary,
           skills: data.skills,
+        }),
+        calculateEmployabilityScore({
+          academicPerformance: academicPerformanceSummary,
+          technicalAndProgrammingSkills: technicalAndProgrammingSkillsSummary,
+          professionalNetworking: professionalNetworkingSummary,
+          problemSolvingSkills: problemSolvingSkillsSummary,
+          extracurricularActivities: extracurricularActivitiesSummary,
         }),
       ]);
 
       setRecommendations(recs);
       setPathways(paths);
+      setEmployabilityScore(scoreOutput);
 
       toast({
         title: "Insights Generated!",
-        description: "Your personalized recommendations and career pathways are ready.",
+        description: "Your personalized recommendations, career pathways, and employability score are ready.",
       });
     } catch (error) {
       console.error("AI processing error:", error);
@@ -138,7 +157,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-semibold tracking-tight text-foreground">Your Employability Dashboard</h2>
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground">Your Career Predictor Dashboard</h2>
         <p className="text-muted-foreground">
           Fill in your details to get AI-powered insights and career suggestions.
         </p>
@@ -164,11 +183,12 @@ export default function DashboardPage() {
             <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Code2 className="text-primary" /> Coding & Technical Profile</CardTitle>
-                <CardDescription>Detail your coding skills and projects.</CardDescription>
+                <CardDescription>Detail your coding skills, projects, and online presence.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField name="coding.githubUsername" label="GitHub Username (Optional)" placeholder="your-github-username" />
                 <FormField name="coding.codingPlatformUsername" label="Coding Platform Username (Optional)" placeholder="e.g., LeetCode username" />
+                <FormField name="linkedinProfile" label="LinkedIn Profile URL (Optional)" placeholder="https://linkedin.com/in/yourprofile" error={errors.linkedinProfile} icon={<Linkedin className="text-primary h-4 w-4" />} />
                 <FormField name="coding.programmingLanguages" label="Programming Languages" placeholder="e.g., Python, Java, JavaScript" error={errors.coding?.programmingLanguages}/>
                 <FormTextareaField name="coding.keyProjects" label="Key Projects" placeholder="Describe 1-2 significant projects" error={errors.coding?.keyProjects}/>
                 <FormTextareaField name="coding.codingPlatformStats" label="Coding Platform Stats (Optional)" placeholder="e.g., LeetCode: 150 solved, Top 10% in contests" />
@@ -210,7 +230,12 @@ export default function DashboardPage() {
                 )}
                 Generate AI Insights
               </Button>
-              <Button type="button" variant="outline" onClick={() => reset(defaultProfileValues)} disabled={isLoading} className="w-full sm:w-auto text-base py-6">
+              <Button type="button" variant="outline" onClick={() => {
+                reset(defaultProfileValues);
+                setRecommendations(null);
+                setPathways(null);
+                setEmployabilityScore(null);
+                }} disabled={isLoading} className="w-full sm:w-auto text-base py-6">
                 <RotateCcw className="mr-2 h-5 w-5" />
                 Reset Form
               </Button>
@@ -220,34 +245,39 @@ export default function DashboardPage() {
       </form>
 
       {/* Results Section */}
-      {(recommendations || pathways || isLoading) && (
+      {(isLoading || employabilityScore || recommendations || pathways) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+          {isLoading && !employabilityScore && (
+            <Card className="shadow-lg animate-pulse">
+              <CardHeader><CardTitle className="flex items-center gap-2"><Gauge className="text-accent" /> Employability Score</CardTitle></CardHeader>
+              <CardContent className="space-y-2 text-center py-8">
+                <div className="h-10 bg-muted rounded w-1/2 mx-auto"></div>
+                <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
+              </CardContent>
+            </Card>
+          )}
+          {employabilityScore && (
             <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Gauge className="text-accent" /> Employability Score</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
-                  <p className="text-6xl font-bold text-primary">78/100</p>
-                  <p className="text-muted-foreground mt-2">(Mock Score - Based on Your Inputs)</p>
-                  <p className="mt-4 text-lg">This is a placeholder score. Real scoring logic will be implemented later.</p>
+                  <p className="text-6xl font-bold text-primary">{employabilityScore.score}/100</p>
+                  <p className="mt-4 text-muted-foreground">
+                    {employabilityScore.feedback || "This score is dynamically calculated by AI based on your profile."}
+                  </p>
                 </div>
               </CardContent>
             </Card>
-
-          {isLoading && !recommendations && !pathways && (
-            <>
-              <Card className="shadow-lg animate-pulse">
-                <CardHeader><CardTitle className="flex items-center gap-2"><Sparkles className="text-accent" /> AI Recommendations</CardTitle></CardHeader>
-                <CardContent className="space-y-2"><div className="h-4 bg-muted rounded w-3/4"></div><div className="h-4 bg-muted rounded w-1/2"></div></CardContent>
-              </Card>
-              <Card className="shadow-lg animate-pulse col-span-1 md:col-span-2">
-                <CardHeader><CardTitle className="flex items-center gap-2"><Waypoints className="text-accent" /> Career Pathway Suggestions</CardTitle></CardHeader>
-                <CardContent className="space-y-2"><div className="h-4 bg-muted rounded w-3/4"></div><div className="h-4 bg-muted rounded w-1/2"></div></CardContent>
-              </Card>
-            </>
           )}
 
+          {isLoading && !recommendations && (
+            <Card className="shadow-lg animate-pulse">
+              <CardHeader><CardTitle className="flex items-center gap-2"><Sparkles className="text-accent" /> AI Recommendations</CardTitle></CardHeader>
+              <CardContent className="space-y-2"><div className="h-4 bg-muted rounded w-3/4"></div><div className="h-4 bg-muted rounded w-1/2"></div></CardContent>
+            </Card>
+          )}
           {recommendations && (
             <Card className="shadow-lg">
               <CardHeader>
@@ -269,9 +299,15 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           )}
-
+          
+          {isLoading && !pathways && (
+             <Card className="shadow-lg animate-pulse col-span-1 md:col-span-2">
+                <CardHeader><CardTitle className="flex items-center gap-2"><Waypoints className="text-accent" /> Career Pathway Suggestions</CardTitle></CardHeader>
+                <CardContent className="space-y-2"><div className="h-4 bg-muted rounded w-3/4"></div><div className="h-4 bg-muted rounded w-1/2"></div></CardContent>
+              </Card>
+          )}
           {pathways && (
-            <Card className="shadow-lg col-span-1 md:col-span-2"> {/* Spans 2 columns on medium screens if recommendations are also shown */}
+            <Card className={`shadow-lg ${employabilityScore && recommendations ? 'col-span-1 md:col-span-2' : 'col-span-1'}`}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Waypoints className="text-accent" /> Career Pathway Suggestions</CardTitle>
               </CardHeader>
@@ -298,16 +334,20 @@ export default function DashboardPage() {
 
   // Helper component for form fields
   interface FormFieldProps {
-    name: keyof ProfileFormData | `academic.${keyof ProfileFormData['academic']}` | `coding.${keyof ProfileFormData['coding']}` | `extracurricular.${keyof ProfileFormData['extracurricular']}`;
+    name: keyof ProfileFormData | `academic.${keyof ProfileFormData['academic']}` | `coding.${keyof ProfileFormData['coding']}` | `extracurricular.${keyof ProfileFormData['extracurricular']}` | 'linkedinProfile';
     label: string;
     placeholder?: string;
     error?: any; // react-hook-form error type
+    icon?: React.ReactNode;
   }
   
-  function FormField({ name, label, placeholder, error }: FormFieldProps) {
+  function FormField({ name, label, placeholder, error, icon }: FormFieldProps) {
     return (
       <div className="space-y-1.5">
-        <Label htmlFor={name} className={error ? 'text-destructive' : ''}>{label}</Label>
+        <Label htmlFor={name} className={cn('flex items-center gap-2', error ? 'text-destructive' : '')}>
+          {icon}
+          {label}
+        </Label>
         <Controller
           name={name}
           control={control}
@@ -318,7 +358,7 @@ export default function DashboardPage() {
     );
   }
 
-  interface FormTextareaFieldProps extends FormFieldProps {}
+  interface FormTextareaFieldProps extends Omit<FormFieldProps, 'icon'> {}
 
   function FormTextareaField({ name, label, placeholder, error }: FormTextareaFieldProps) {
     return (

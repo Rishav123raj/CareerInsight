@@ -26,6 +26,7 @@ export interface ProfileFormData {
   coding: CodingData;
   extracurricular: ExtracurricularData;
   skills: string; // Comma-separated list of technical and soft skills
+  linkedinProfile?: string; // Optional LinkedIn Profile URL
 }
 
 // For AI results
@@ -37,4 +38,9 @@ export interface CareerRecommendation {
 export interface CareerPathway {
   suggestedRoles: string[];
   suggestedPathways: string[];
+}
+
+export interface EmployabilityScore {
+  score: number; // Score out of 100
+  feedback?: string; // Optional brief feedback on the score
 }

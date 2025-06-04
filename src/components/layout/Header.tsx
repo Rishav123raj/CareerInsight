@@ -7,7 +7,7 @@ export function Header() {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
           <BrainCircuit size={32} />
-          <h1 className="text-2xl font-semibold tracking-tight">EmployableAI</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">CareerInsight</h1>
         </Link>
         {/* Future navigation links can go here */}
       </div>
