@@ -40,10 +40,23 @@
       </header>
 
       <section class="widgets">
-        <div class="widget employability">
-          <h3>Employability Score</h3>
-          <p>85%</p>
+        <div class="widget employability" id="employabilityWidget">
+          <h3 id="employabilityTitle">Employability Score</h3>
+          <p id="employabilityScore">Click to Calculate</p>
         </div>
+        <!-- Popup Form for Employability Score Calculation -->
+        <div id="employabilityFormCard" class="form-card hidden">
+          <h3>Enter Your Details</h3>
+          <form id="employabilityForm">
+            <input type="text" id="technicalExpertise" placeholder="Technical Expertise" required />
+            <input type="url" id="githubLink" placeholder="GitHub Profile URL" required />
+            <input type="url" id="leetcodeLink" placeholder="LeetCode Profile URL" required />
+            <input type="url" id="linkedinLink" placeholder="LinkedIn Profile URL" required />
+            <button type="submit">Submit</button>
+          </form>
+        </div>
+        <script src="js/employ.js"></script>
+        
         <div class="widget technical">
           <h3>Technical Skills</h3>
           <p>92%</p>
