@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, LogIn, UserPlus, BrainCircuit, BarChartBig, SparklesIcon } from 'lucide-react';
 import Image from 'next/image';
-import { cn } from '@/lib/utils'; // Added this import
+import { cn } from '@/lib/utils';
 
 export default function LandingPage() {
   return (
@@ -38,7 +38,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <Image
-                src="https://placehold.co/600x400.png"
+                src="/image/careerinsight.png"
                 alt="Career Dashboard Preview"
                 width={600}
                 height={400}
