@@ -40,27 +40,32 @@
   </script>
 </head>
 <body>
-  <div class="signin-container">
-    <div class="signin-box">
-      <h2>Welcome Back!</h2>
-      <p class="subtext">Login to your CareerInsight account</p>
-      <form id="signin-form" onsubmit="handleSignIn(event)">
-        <div class="form-group">
-          <label for="name">Name</label>
-          <input type="text" id="userName" name="userName" placeholder="Enter your name" required />
-        </div>
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" placeholder="Enter your email" required />
-        </div>
-        <div class="form-group">
+  <div class="container">
+    <div class="login-box">
+      <div class="form-section">
+        <h2 class="logo">Welcome back ! 👋</h2>
+        <p class="welcome">Login to your CareerInsight account </p>
+
+        <form id="signin-form" onsubmit="handleSignIn(event)">
+            <label for="userName">Full Name</label>
+            <input type="text" id="userName" placeholder="Enter your full name" required />
+
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="login@mail.com" required />
+
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" required />
-        </div>
-        <p id="error-text"></p>
-        <button type="submit" class="signin-button">Sign In</button>
-      </form>
-      <p class="signup-link">Don't have an account? <a href="signup.html">Create one</a></p>
+          <input type="password" id="password" placeholder="••••••••" required />
+          <p id="error-text"></p>
+          <button type="submit" class="login-btn">LOGIN</button>
+
+          <p class="signup-text">
+            Don’t have an account yet? <a href="signup.html">Sign Up Here</a>
+          </p>
+        </form>
+      </div>
+      <div class="image-section">
+        <img src="https://media.istockphoto.com/id/1178763127/vector/man-with-laptop-sitting-on-the-chair-freelance-or-studying-concept-cute-illustration-in-flat.jpg?s=612x612&w=0&k=20&c=gzk5c0q1DkndI2IFHIBCHIapEiFHm6JuG0-6C3xL-3I=" alt="Login Illustration" />
+      </div>
     </div>
   </div>
 </body>

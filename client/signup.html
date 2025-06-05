@@ -47,31 +47,35 @@
 </script>
 </head>
 <body>
-  <div class="signup-container">
-    <div class="signup-box">
-      <h2>Create Your Account</h2>
-      <p class="subtext">Join CareerInsight to unlock your career potential.</p>
-      <form id="signup-form" onsubmit="validateForm(event)">
-        <div class="form-group">
-          <label for="name">Full Name</label>
-          <input type="text" id="name" name="name" placeholder="Enter your full name" required>
-        </div>
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" placeholder="Enter your email" required>
-        </div>
-        <div class="form-group">
+  <div class="container">
+    <div class="login-box">
+      <div class="form-section">
+        <form id="signup-form" onsubmit="validateForm(event)">
+      <h2 class="logo">Create Your Account </h2>
+      <h4>Join CareerInsight to unlock your career potential.</h4><br><br>
+
+      <label for="name">Full Name</label>
+      <input type="text" id="name" placeholder="Enter your full name" required />
+
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="login@mail.com" required />
+
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" required>
-        </div>
-        <div class="form-group">
+          <input type="password" id="password" placeholder="••••••••" required />
+
           <label for="confirm-password">Confirm Password</label>
-          <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
-        </div>
-        <p id="error-text"></p>
-        <button type="submit" class="signup-button">Sign Up</button>
-      </form>
-      <p class="login-link">Already have an account? <a href="signin.html">Sign In</a></p>
+          <input type="password" id="confirm-password" placeholder="Confirm your password" required />
+          <p id="error-text"></p>
+          <button type="submit" class="signin-btn">Register</button>
+
+          <p class="signin-text">
+            Already have an account ? <a href="signin.html">Sign In Here</a>
+          </p>
+        </form>
+      </div>
+      <div class="image-section">
+        <img src="https://img.freepik.com/premium-vector/woman-with-laptop-showing_126609-931.jpg?semt=ais_hybrid&w=740" alt="Login Illustration" />
+      </div>
     </div>
   </div>
 </body>
