@@ -6,7 +6,7 @@ import { Header } from '@/components/layout/Header';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'EmployableAI - Your Career Insight Partner',
+  title: 'CareerInsight',
   description: 'Analyze academic and non-academic performance to predict and improve employability with AI-driven insights.',
 };
 

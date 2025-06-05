@@ -1,4 +1,4 @@
-# **App Name**: EmployableAI
+# **App Name**: CareerInsight
 
 ## Core Features:
 

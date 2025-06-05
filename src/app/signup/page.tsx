@@ -74,7 +74,7 @@ export default function SignUpPage() {
             <UserPlus className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-3xl font-bold">Create an Account</CardTitle>
-          <CardDescription>Join EmployableAI to unlock your career potential.</CardDescription>
+          <CardDescription>Join CareerInsight to unlock your career potential.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

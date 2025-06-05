@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, LogIn, UserPlus, BrainCircuit, BarChartBig, SparklesIcon } from 'lucide-react';
 import Image from 'next/image';
+import { cn } from '@/lib/utils'; // Added this import
 
 export default function LandingPage() {
   return (
@@ -17,7 +18,7 @@ export default function LandingPage() {
                 <div className="space-y-2">
                   <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-foreground">
                     Unlock Your Career Potential with
-                    <span className="text-primary"> EmployableAI</span>
+                    <span className="text-primary"> CareerInsight</span>
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
                     Get personalized, AI-driven insights into your employability, discover tailored career paths, and receive actionable recommendations to boost your professional journey.
@@ -56,7 +57,7 @@ export default function LandingPage() {
                   Key Features
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-foreground">
-                  Why Choose EmployableAI?
+                  Why Choose CareerInsight?
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                   Our platform analyzes your unique profile to deliver insights that truly matter for your career growth.
@@ -107,7 +108,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t bg-background">
-        <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} EmployableAI. All rights reserved.</p>
+        <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} CareerInsight. All rights reserved.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link href="#" className="text-xs hover:underline underline-offset-4 text-muted-foreground">
             Terms of Service
