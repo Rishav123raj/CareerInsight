@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, LogIn, UserPlus, BrainCircuit, BarChartBig, SparklesIcon } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import careerInsightImage from './image/careerinsight.png'; // Import the image
 
 export default function LandingPage() {
   return (
@@ -38,12 +39,13 @@ export default function LandingPage() {
                 </div>
               </div>
               <Image
-                src="/image/careerinsight.png"
+                src={careerInsightImage} // Use the imported image
                 alt="Career Dashboard Preview"
-                width={600}
+                width={400}
                 height={400}
                 className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last lg:aspect-square shadow-xl"
                 data-ai-hint="career dashboard abstract"
+                priority // Add priority if it's a Large Contentful Paint (LCP) element
               />
             </div>
           </div>
