@@ -20,7 +20,7 @@ export default function RootLayout({
       <body className={`${GeistSans.variable} font-sans antialiased bg-background text-foreground`}>
         <div className="flex flex-col min-h-screen">
           <Header />
-          <main className="flex-grow"> {/* Removed container and padding here, apply per-page */}
+          <main className="flex-grow">
             {children}
           </main>
           <Toaster />

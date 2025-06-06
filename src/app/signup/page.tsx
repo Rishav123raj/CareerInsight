@@ -54,9 +54,12 @@ export default function SignUpPage() {
     setIsLoading(true);
     // Simulate API call for sign-up
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     // SIMULATED: In a real app, you'd create a user in your backend.
     console.log("Simulated sign-up with:", data.name, data.email);
+
+    // Store name temporarily to be picked up by sign-in if needed for personalization
+    // localStorage.setItem('tempUserName', data.name);
 
     toast({
       title: "Account Created!",
@@ -86,10 +89,10 @@ export default function SignUpPage() {
                   name="name"
                   control={control}
                   render={({ field }) => (
-                    <Input 
-                      id="name" 
-                      placeholder="Your Name" 
-                      {...field} 
+                    <Input
+                      id="name"
+                      placeholder="Your Name"
+                      {...field}
                       className={cn("pl-10", errors.name ? 'border-destructive' : '')}
                     />
                   )}
@@ -106,11 +109,11 @@ export default function SignUpPage() {
                   name="email"
                   control={control}
                   render={({ field }) => (
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="you@example.com" 
-                      {...field} 
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      {...field}
                       className={cn("pl-10", errors.email ? 'border-destructive' : '')}
                     />
                   )}
@@ -127,11 +130,11 @@ export default function SignUpPage() {
                   name="password"
                   control={control}
                   render={({ field }) => (
-                    <Input 
-                      id="password" 
-                      type="password" 
-                      placeholder="••••••••" 
-                      {...field} 
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      {...field}
                       className={cn("pl-10", errors.password ? 'border-destructive' : '')}
                     />
                   )}
@@ -148,11 +151,11 @@ export default function SignUpPage() {
                   name="confirmPassword"
                   control={control}
                   render={({ field }) => (
-                    <Input 
-                      id="confirmPassword" 
-                      type="password" 
-                      placeholder="••••••••" 
-                      {...field} 
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      {...field}
                       className={cn("pl-10", errors.confirmPassword ? 'border-destructive' : '')}
                     />
                   )}
@@ -160,7 +163,7 @@ export default function SignUpPage() {
               </div>
               {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
             </div>
-            
+
             <Button type="submit" disabled={isLoading} className="w-full text-lg py-6">
               {isLoading ? (
                 <Loader2 className="mr-2 h-6 w-6 animate-spin" />

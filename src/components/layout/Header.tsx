@@ -36,7 +36,7 @@ export function Header() {
 
   const handleSignOut = () => {
     localStorage.removeItem('isAuthenticated');
-    // Optionally remove other user-related items from localStorage
+    localStorage.removeItem('userName'); // Also remove userName on sign out
     setIsAuthenticated(false);
     toast({
       title: "Signed Out",
@@ -71,11 +71,11 @@ export function Header() {
           <BrainCircuit size={32} />
           <h1 className="text-2xl font-semibold tracking-tight">CareerInsight</h1>
         </Link>
-        
+
         <nav className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
-              <Link href="/dashboard">
+              <Link href="/dashboard/student">
                 <Button variant="ghost" className="hover:bg-primary/80 text-primary-foreground">
                   <LayoutDashboard className="mr-2 h-5 w-5" /> Dashboard
                 </Button>

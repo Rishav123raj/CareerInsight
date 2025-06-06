@@ -53,14 +53,21 @@ export default function SignInPage() {
     console.log("Simulated sign-in with:", data);
 
     // Simulate successful login
-    localStorage.setItem('isAuthenticated', 'true'); 
+    localStorage.setItem('isAuthenticated', 'true');
     // Optionally store user info if needed, e.g., localStorage.setItem('userEmail', data.email);
-    
+    // If user's name was captured during sign-up and you want to display it on the dashboard:
+    // const userName = localStorage.getItem('tempUserName'); // Assuming name was stored temporarily
+    // if (userName) {
+    //   localStorage.setItem('userName', userName);
+    //   localStorage.removeItem('tempUserName');
+    // }
+
+
     toast({
       title: "Signed In Successfully!",
-      description: "Welcome back! Redirecting you to the dashboard...",
+      description: "Welcome back! Redirecting you to your dashboard...",
     });
-    router.push('/dashboard');
+    router.push('/dashboard/student'); // Redirect to the new student dashboard
     // No need to setIsLoading(false) here as we are redirecting
   };
 
@@ -72,7 +79,7 @@ export default function SignInPage() {
             <LogIn className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-3xl font-bold">Welcome Back!</CardTitle>
-          <CardDescription>Sign in to access your Career Predictor Dashboard.</CardDescription>
+          <CardDescription>Sign in to access your CareerInsight Dashboard.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -84,11 +91,11 @@ export default function SignInPage() {
                   name="email"
                   control={control}
                   render={({ field }) => (
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="you@example.com" 
-                      {...field} 
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      {...field}
                       className={cn("pl-10", errors.email ? 'border-destructive' : '')}
                     />
                   )}
@@ -105,11 +112,11 @@ export default function SignInPage() {
                   name="password"
                   control={control}
                   render={({ field }) => (
-                    <Input 
-                      id="password" 
-                      type="password" 
-                      placeholder="••••••••" 
-                      {...field} 
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      {...field}
                       className={cn("pl-10", errors.password ? 'border-destructive' : '')}
                     />
                   )}
@@ -117,7 +124,7 @@ export default function SignInPage() {
               </div>
               {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
             </div>
-            
+
             <Button type="submit" disabled={isLoading} className="w-full text-lg py-6">
               {isLoading ? (
                 <Loader2 className="mr-2 h-6 w-6 animate-spin" />
