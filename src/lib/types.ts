@@ -7,18 +7,18 @@ export interface AcademicData {
 }
 
 export interface CodingData {
-  githubUsername: string;
-  codingPlatformUsername: string; // e.g., LeetCode, Codeforces
+  githubUsername?: string; // Made optional to align with form
+  codingPlatformUsername?: string; // Made optional to align with form
   programmingLanguages: string; // Comma-separated
   keyProjects: string; // Textarea for project descriptions
-  codingPlatformStats: string; // e.g., "LeetCode: 200 problems solved (50 Hard)"
+  codingPlatformStats?: string; // e.g., "LeetCode: 200 problems solved (50 Hard)"
 }
 
 export interface ExtracurricularData {
-  certifications: string; // Textarea
-  eventsParticipated: string; // Textarea
-  hackathonExperience: string; // Textarea
-  leadershipRoles: string; // Textarea
+  certifications?: string; // Textarea
+  eventsParticipated?: string; // Textarea
+  hackathonExperience?: string; // Textarea
+  leadershipRoles?: string; // Textarea
 }
 
 // This is the structure for the form
@@ -31,8 +31,13 @@ export interface ProfileFormData {
 }
 
 // For AI results
+export interface RecommendationItem {
+  action: string; // The actual recommendation
+  suggestedLearningResources: string[]; // Suggested courses/resources for this action
+}
+
 export interface CareerRecommendation {
-  recommendations: string[];
+  recommendations: RecommendationItem[];
   suggestedRoles: string[];
 }
 

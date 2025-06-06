@@ -34,7 +34,8 @@ import {
   BarChart3,
   LineChart as LineChartIcon,
   Package,
-  ChevronRight
+  ChevronRight,
+  BookOpenCheck,
 } from 'lucide-react';
 import type {
   ProfileFormData,
@@ -46,6 +47,7 @@ import type {
   CommitHistoryData,
   LeetCodeDifficultyData,
   LeetCodeDailyActivityData,
+  RecommendationItem,
 } from '@/lib/types';
 import { generateCareerRecommendations } from '@/ai/flows/generate-career-recommendations';
 import { suggestCareerPathways } from '@/ai/flows/suggest-career-pathways';
@@ -321,9 +323,9 @@ export default function CareerPredictorPage() {
                 <CardDescription>Detail your coding skills, projects, and online presence.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField name="coding.githubUsername" label="GitHub Username" placeholder="your-github-username" icon={<Github className="text-primary h-4 w-4" />} control={control} />
-                <FormField name="coding.codingPlatformUsername" label="Coding Platform Username" placeholder="e.g., LeetCode username" icon={<Activity className="text-primary h-4 w-4" />} control={control} />
-                <FormField name="linkedinProfile" label="LinkedIn Profile URL" placeholder="https://linkedin.com/in/yourprofile" error={errors.linkedinProfile} icon={<Linkedin className="text-primary h-4 w-4" />} control={control}/>
+                <FormField name="coding.githubUsername" label="GitHub Username (Optional)" placeholder="your-github-username" icon={<Github className="text-primary h-4 w-4" />} control={control} />
+                <FormField name="coding.codingPlatformUsername" label="Coding Platform Username (Optional)" placeholder="e.g., LeetCode username" icon={<Activity className="text-primary h-4 w-4" />} control={control} />
+                <FormField name="linkedinProfile" label="LinkedIn Profile URL (Optional)" placeholder="https://linkedin.com/in/yourprofile" error={errors.linkedinProfile} icon={<Linkedin className="text-primary h-4 w-4" />} control={control}/>
                 <FormField name="coding.programmingLanguages" label="Programming Languages" placeholder="e.g., Python, Java, JavaScript" error={errors.coding?.programmingLanguages} control={control}/>
                 <FormTextareaField name="coding.keyProjects" label="Key Projects" placeholder="Describe 1-2 significant projects" error={errors.coding?.keyProjects} control={control}/>
                 <FormTextareaField name="coding.codingPlatformStats" label="Coding Platform Stats (Optional)" placeholder="e.g., LeetCode: 150 solved, Top 10% in contests" control={control} />
@@ -421,13 +423,26 @@ export default function CareerPredictorPage() {
                 <CardTitle className="flex items-center gap-2"><Sparkles className="text-accent" /> AI Recommendations</CardTitle>
               </CardHeader>
               <CardContent>
-                <h3 className="font-semibold text-lg mb-2">Personalized Actions:</h3>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                  {recommendations.recommendations.map((rec, index) => (
-                    <li key={index}>{rec}</li>
-                  ))}
-                </ul>
-                <h3 className="font-semibold text-lg mt-4 mb-2">Suggested Roles to Explore:</h3>
+                <h3 className="font-semibold text-lg mb-2">Personalized Actions & Learning:</h3>
+                {recommendations.recommendations.map((recItem, index) => (
+                  <div key={index} className="mb-4 pb-3 border-b last:border-b-0 last:pb-0 last:mb-0">
+                    <p className="text-sm text-foreground mb-1.5">{recItem.action}</p>
+                    {recItem.suggestedLearningResources && recItem.suggestedLearningResources.length > 0 && (
+                      <div className="mt-1">
+                        <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1.5">
+                          <BookOpenCheck className="h-3.5 w-3.5 text-primary" />
+                          Suggested Learning:
+                        </p>
+                        <ul className="list-disc pl-5 space-y-0.5">
+                          {recItem.suggestedLearningResources.map((resource, rIndex) => (
+                            <li key={rIndex} className="text-xs text-muted-foreground/90">{resource}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <h3 className="font-semibold text-lg mt-6 mb-2">Suggested Roles to Explore:</h3>
                 <div className="flex flex-wrap gap-2">
                   {recommendations.suggestedRoles.map((role, index) => (
                     <span key={index} className="px-3 py-1 text-xs rounded-full bg-accent text-accent-foreground">{role}</span>
@@ -601,4 +616,3 @@ function FormTextareaField({ name, label, placeholder, error, control }: FormTex
     </div>
   );
 }
-

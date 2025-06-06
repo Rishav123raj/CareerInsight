@@ -1,8 +1,9 @@
+
 // src/ai/flows/generate-career-recommendations.ts
 'use server';
 
 /**
- * @fileOverview Provides AI-powered career recommendations based on a student's profile.
+ * @fileOverview Provides AI-powered career recommendations based on a student's profile, including learning resource suggestions.
  *
  * - generateCareerRecommendations - A function that generates personalized career suggestions.
  * - CareerRecommendationsInput - The input type for the generateCareerRecommendations function.
@@ -25,10 +26,15 @@ const CareerRecommendationsInputSchema = z.object({
 });
 export type CareerRecommendationsInput = z.infer<typeof CareerRecommendationsInputSchema>;
 
+const RecommendationItemSchema = z.object({
+    action: z.string().describe("A specific, actionable recommendation for the student."),
+    suggestedLearningResources: z.array(z.string()).describe("A list of 1-2 suggested online learning resources or course types from well-known platforms (e.g., Coursera, Udemy, edX, freeCodeCamp, official documentation) that directly help implement the 'action'. Be specific about the type of course or resource.")
+});
+
 const CareerRecommendationsOutputSchema = z.object({
   recommendations: z
-    .array(z.string())
-    .describe('A list of personalized recommendations to enhance employability.'),
+    .array(RecommendationItemSchema)
+    .describe('A list of personalized recommendations, each with an action and suggested learning resources.'),
   suggestedRoles: z
     .array(z.string())
     .describe('A list of potential job roles based on the user profile.'),
@@ -53,8 +59,13 @@ const prompt = ai.definePrompt({
   Coding Skills: {{{codingSkills}}}
   Extracurricular Activities: {{{extracurricularActivities}}}
 
+  For each personalized recommendation (action), also suggest 1-2 specific types of online learning resources or courses from well-known platforms (e.g., Coursera, Udemy, edX, freeCodeCamp, official documentation, specific technology tutorials) that would directly help the student act on that recommendation.
+  For example, if a recommendation is "Improve Python skills for data analysis", suggested resources could be "Python for Everybody on Coursera" or "Data analysis with Python tutorials on Real Python".
+  If a recommendation is "Build more complex projects using React", suggested resources could be "Full-Stack Open course (React section)" or "Advanced React patterns on official React documentation".
+
   Recommendations should be specific and actionable.
   Suggested job roles should align with the student's profile.
+  Return the output in the specified JSON format.
   `,
 });
 
@@ -66,6 +77,9 @@ const generateCareerRecommendationsFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+        throw new Error("Failed to get a response from the AI for career recommendations.");
+    }
+    return output;
   }
 );
