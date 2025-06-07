@@ -1,19 +1,17 @@
 
 import mongoose from 'mongoose';
 
+// This environment variable is critical.
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-  // Log a prominent error on the server console
+if (!MONGODB_URI || MONGODB_URI === "YOUR_MONGODB_CONNECTION_STRING_PLEASE_REPLACE_ME") {
   console.error(
-    '\nFATAL ERROR: MONGODB_URI environment variable is not defined.\n' +
-    'Please ensure you have a .env file in the project root with MONGODB_URI set to your MongoDB connection string.\n' +
-    'Example: MONGODB_URI="mongodb://localhost:27017/yourdbname" or your Atlas connection string.\n'
+    '\n🔴 FATAL ERROR: MONGODB_URI is not properly configured in your .env file.\n' +
+    'Please ensure you have a .env file in the project root with a VALID MONGODB_URI.\n' +
+    'Current value is missing or still a placeholder.\n'
   );
-  // This error will be caught by the server action and potentially returned to the client.
-  throw new Error(
-    'MongoDB URI is not configured. Please define the MONGODB_URI environment variable in your .env file.'
-  );
+  // This error helps identify the issue early if the server tries to start without a proper URI.
+  // For server actions, they will catch this if dbConnect is called.
 }
 
 /**
@@ -28,38 +26,52 @@ if (!cached) {
 }
 
 async function dbConnect() {
+  if (!MONGODB_URI || MONGODB_URI === "YOUR_MONGODB_CONNECTION_STRING_PLEASE_REPLACE_ME") {
+    console.error("🔴 dbConnect Error: MONGODB_URI is not defined or is a placeholder. Cannot connect to database.");
+    throw new Error('MongoDB URI is not configured. Please check your .env file.');
+  }
+
   if (cached.conn) {
+    console.log("🟢 Using cached MongoDB connection.");
     return cached.conn;
   }
 
   if (!cached.promise) {
     const opts = {
-      bufferCommands: false,
+      bufferCommands: false, // Disable mongoose buffering, good for diagnosing connection issues
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
     };
 
-    // Ensure MONGODB_URI is re-checked here in case the initial throw didn't stop execution (shouldn't happen but good practice)
-    if (!MONGODB_URI) {
-        console.error("dbConnect: MONGODB_URI is missing even after initial check.");
-        throw new Error("MongoDB URI is missing.");
-    }
-    
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      console.log("MongoDB connected successfully.");
-      return mongoose;
+    console.log("🟡 Attempting to connect to MongoDB...");
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
+      console.log("✅ MongoDB connected successfully!");
+      return mongooseInstance;
     }).catch(err => {
-      console.error("MongoDB connection error in promise:", err.message);
-      cached.conn = null; // Reset conn on promise error
-      cached.promise = null; // Reset promise on error to allow retry
-      throw err; // Re-throw to be caught by the caller
+      console.error("🔴 MongoDB connection error during initial connection promise:", err.message);
+      console.error("Full error stack for connection promise:", err.stack);
+      // Reset promise on error to allow retry on subsequent calls if the issue is transient
+      cached.promise = null;
+      // Re-throw to be caught by the caller of dbConnect
+      throw new Error(`Failed to connect to MongoDB: ${err.message}. Check server logs for details.`);
     });
   }
 
   try {
+    console.log("⏳ Awaiting MongoDB connection promise...");
     cached.conn = await cached.promise;
   } catch (e: any) {
-    cached.promise = null; // Ensure promise is reset on failure to allow retry
-    console.error("Failed to establish MongoDB connection:", e.message);
-    throw e; // Re-throw to be caught by server actions
+    // This catch block is important if the promise was already set but failed.
+    console.error("🔴 Failed to establish MongoDB connection after awaiting promise:", e.message);
+    console.error("Full error stack for await promise:", e.stack);
+    cached.promise = null; // Ensure promise is reset on failure
+    // Re-throw to ensure server actions can report a failure.
+    throw new Error(`Database connection failed: ${e.message}. Check server logs.`);
+  }
+  
+  if (!cached.conn) {
+    // This case should ideally be caught by the promise rejection, but as a safeguard:
+    console.error("🔴 dbConnect Error: Connection object is null after attempting connection.");
+    throw new Error("Database connection attempt resulted in a null connection object.");
   }
 
   return cached.conn;

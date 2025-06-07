@@ -29,9 +29,10 @@ export async function signUpUser(formData: FormData): Promise<SignUpResponse> {
     return { success: false, message: 'Password must be at least 6 characters.'}
   }
 
-
   try {
+    console.log("Attempting to connect to DB for sign up...");
     await dbConnect();
+    console.log("DB connected for sign up.");
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -47,6 +48,7 @@ export async function signUpUser(formData: FormData): Promise<SignUpResponse> {
     });
 
     await newUser.save();
+    console.log("New user saved successfully:", newUser.email);
 
     return {
       success: true,
@@ -54,13 +56,19 @@ export async function signUpUser(formData: FormData): Promise<SignUpResponse> {
       user: { id: newUser._id.toString(), name: newUser.name, email: newUser.email },
     };
   } catch (error: any) {
-    console.error('Sign up error:', error);
-    // More specific error handling can be added here (e.g., for validation errors from Mongoose)
-    if (error.name === 'ValidationError') {
+    console.error('🔴 Sign up error in server action:');
+    console.error('Message:', error.message);
+    console.error('Stack:', error.stack);
+    
+    let userMessage = 'An unexpected error occurred during sign up. Please try again.';
+    if (error.message && error.message.toLowerCase().includes('mongodb')) {
+      userMessage = 'Database error during sign up. Please check server logs and MongoDB connection.';
+    } else if (error.name === 'ValidationError') {
         let messages = Object.values(error.errors).map((err: any) => err.message);
-        return { success: false, message: `Validation Error: ${messages.join(', ')}` };
+        userMessage = `Validation Error: ${messages.join(', ')}`;
     }
-    return { success: false, message: 'An unexpected error occurred. Please try again.' };
+    
+    return { success: false, message: userMessage };
   }
 }
 
@@ -73,15 +81,17 @@ export async function signInUser(formData: FormData): Promise<SignInResponse> {
   }
 
   try {
+    console.log("Attempting to connect to DB for sign in...");
     await dbConnect();
+    console.log("DB connected for sign in.");
 
-    const user = await User.findOne({ email }).select('+password'); // Explicitly select password
+    const user = await User.findOne({ email }).select('+password'); 
     if (!user) {
       return { success: false, message: 'Invalid email or password.' };
     }
 
     if (!user.password) {
-        // This case should ideally not happen if password is required on schema and always set
+        console.error("User account incomplete - password field missing from DB record for:", email);
         return { success: false, message: 'User account incomplete. Please contact support.' };
     }
 
@@ -90,13 +100,22 @@ export async function signInUser(formData: FormData): Promise<SignInResponse> {
       return { success: false, message: 'Invalid email or password.' };
     }
 
+    console.log("User signed in successfully:", user.email);
     return {
       success: true,
       message: 'Signed in successfully!',
       user: { id: user._id.toString(), name: user.name, email: user.email },
     };
-  } catch (error) {
-    console.error('Sign in error:', error);
-    return { success: false, message: 'An unexpected error occurred. Please try again.' };
+  } catch (error: any) {
+    console.error('🔴 Sign in error in server action:');
+    console.error('Message:', error.message);
+    console.error('Stack:', error.stack);
+
+    let userMessage = 'An unexpected error occurred during sign in. Please try again.';
+    if (error.message && error.message.toLowerCase().includes('mongodb')) {
+      userMessage = 'Database error during sign in. Please check server logs and MongoDB connection.';
+    }
+    
+    return { success: false, message: userMessage };
   }
 }
