@@ -6,7 +6,18 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Sparkles, ArrowRight, UserCircle } from 'lucide-react';
+import { 
+  Loader2, 
+  Sparkles, 
+  ArrowRight, 
+  UserCircle,
+  UserCheck,
+  Edit3,
+  Zap,
+  BookOpen,
+  Briefcase,
+  Lightbulb
+} from 'lucide-react';
 
 export default function StudentDashboardPage() {
   const router = useRouter();
@@ -35,7 +46,8 @@ export default function StudentDashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12 space-y-16"> {/* Increased overall spacing */}
+      {/* Existing Welcome Section */}
       <div className="flex flex-col items-center text-center space-y-8">
         <UserCircle className="h-24 w-24 text-primary" />
         <h1 className="text-4xl font-bold tracking-tight text-foreground">
@@ -65,7 +77,81 @@ export default function StudentDashboardPage() {
             </Link>
           </CardContent>
         </Card>
-        
+      </div>
+
+      {/* New Engaging Content Section */}
+      <div>
+        <h2 className="text-3xl font-semibold tracking-tight text-center mb-10 text-foreground">
+          Explore & Enhance Your Journey
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Profile Status Card */}
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl gap-2">
+                <UserCheck className="h-6 w-6 text-primary" />
+                Profile Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                A complete and up-to-date profile in the Career Predictor helps us provide you with the most accurate and personalized insights.
+              </p>
+              <Button variant="outline" className="w-full group" asChild>
+                <Link href="/dashboard/career-predictor">
+                  <Edit3 className="mr-2 h-4 w-4 group-hover:animate-pulse" /> 
+                  Update Profile & Get Insights
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Quick Links Card */}
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl gap-2">
+                <Zap className="h-6 w-6 text-primary" />
+                Quick Links
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button variant="ghost" className="w-full justify-start p-3 hover:bg-secondary group" asChild>
+                <Link href="/dashboard/career-predictor">
+                  <Sparkles className="mr-3 h-5 w-5 text-primary group-hover:text-accent transition-colors" />
+                  Re-run AI Career Analysis
+                </Link>
+              </Button>
+              <Button variant="ghost" className="w-full justify-start p-3 hover:bg-secondary group" asChild>
+                <Link href="#"> {/* Placeholder link */}
+                  <BookOpen className="mr-3 h-5 w-5 text-primary group-hover:text-accent transition-colors" />
+                  Explore Learning Resources
+                </Link>
+              </Button>
+              <Button variant="ghost" className="w-full justify-start p-3 hover:bg-secondary group" disabled> {/* Placeholder link - disabled */}
+                <Link href="#">
+                  <Briefcase className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
+                  Browse Job Openings (Soon)
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Food for Thought Card */}
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl gap-2">
+                <Lightbulb className="h-6 w-6 text-primary" />
+                Food for Thought
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <blockquote className="text-sm italic text-muted-foreground border-l-4 border-primary pl-4 py-2 bg-secondary/30 rounded-r-md">
+                "The best way to predict the future is to create it."
+              </blockquote>
+              <p className="text-xs text-muted-foreground mt-2 text-right">- Peter Drucker</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
