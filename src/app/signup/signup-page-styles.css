@@ -1,0 +1,222 @@
+
+/* Adapted from user-provided CSS for the signup page */
+
+.signup-page-wrapper {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - theme(spacing.16)); /* Account for header height */
+  width: 100%;
+  background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  padding: 2rem 1rem; /* Add some padding for smaller screens */
+  box-sizing: border-box;
+}
+
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.signup-container {
+  width: 100%;
+  max-width: 1000px;
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column; /* Stack sections vertically on small screens */
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) { /* lg breakpoint */
+  .signup-container {
+    flex-direction: row; /* Side-by-side on larger screens */
+  }
+}
+
+.login-box { /* Renamed to signup-box for clarity, or use as intended if this is a shared style */
+  display: flex;
+  width: 100%;
+  flex-direction: column; /* Default to column for mobile-first */
+}
+
+@media (min-width: 1024px) { /* lg breakpoint */
+  .login-box {
+    flex-direction: row;
+  }
+}
+
+
+.form-section {
+  flex: 1;
+  padding: 30px; /* Adjusted padding */
+}
+
+@media (min-width: 768px) { /* md breakpoint */
+  .form-section {
+    padding: 50px;
+  }
+}
+
+.image-section {
+  flex: 1;
+  background-color: #e3f2ff; /* Light blue background for image area */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px; /* Add padding for the image */
+  min-height: 300px; /* Ensure some height on small screens */
+}
+
+.image-section img,
+.image-section > div { /* Target next/image wrapper */
+  width: 100%;
+  max-width: 400px;
+  height: auto; /* Maintain aspect ratio */
+  border-radius: 10px; /* Optional: if image itself should be rounded */
+}
+
+.logo {
+  color: #d63384;
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-size: 1.25rem; /* Adjust size */
+  text-align: center;
+}
+
+.welcome {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.form-section h2 { /* Scoped h2 */
+  font-size: 28px;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.form-section form label { /* Scoped form label */
+  display: block;
+  margin-bottom: 5px;
+  color: #444;
+  font-weight: 500;
+}
+
+.form-section form input[type="text"],
+.form-section form input[type="email"],
+.form-section form input[type="password"] { /* Scoped form input */
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box; /* Ensure padding doesn't expand width */
+}
+
+/* Styling for ShadCN Input components to match custom CSS */
+/* This uses attribute selectors to target ShadCN's rendered inputs */
+input[data-geist-input="true"] {
+    padding: 12px 15px !important;
+    border: 1px solid #ccc !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+}
+input[data-geist-input="true"].border-destructive {
+    border-color: hsl(var(--destructive)) !important;
+}
+
+
+.forgot-password { /* This class was in the provided CSS, but not used in current signup form */
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.forgot-password a {
+  text-decoration: none;
+  color: #3498db;
+  font-size: 13px;
+}
+
+.signin-btn { /* This will be applied to the ShadCN Button */
+  width: 100%;
+  padding: 12px !important; /* Important to override ShadCN's default padding */
+  background-color: #d63384 !important; /* Important for specificity */
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signin-btn:hover {
+  background-color: #c0206f !important;
+}
+
+.signin-btn:disabled {
+  background-color: #e08db9 !important; /* Lighter pink for disabled state */
+  cursor: not-allowed;
+}
+
+
+.signin-text { /* Renamed from .signin-text to .login-prompt-text for clarity */
+  text-align: center;
+  font-size: 13px;
+  margin-top: 1.5rem; /* Added margin from button */
+}
+
+.login-prompt-text a {
+  color: #d63384;
+  text-decoration: none;
+  font-weight: 500;
+}
+.login-prompt-text a:hover {
+  text-decoration: underline;
+}
+
+/* Specific styles for error messages */
+.error-message {
+  font-size: 0.75rem; /* 12px */
+  color: hsl(var(--destructive)); /* Tailwind destructive color */
+  margin-top: -10px; /* Pull up slightly below the input */
+  margin-bottom: 10px; /* Space before next element */
+}
+
+/* Ensure icon alignment within input fields if using them */
+.input-wrapper {
+  position: relative;
+  margin-bottom: 15px; /* Match input margin-bottom */
+}
+
+.input-wrapper > svg {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa; /* Muted icon color */
+}
+
+.input-wrapper input[type="text"],
+.input-wrapper input[type="email"],
+.input-wrapper input[type="password"] {
+  padding-left: 40px; /* Space for icon */
+  margin-bottom: 0; /* Remove margin from input as wrapper handles it */
+}
