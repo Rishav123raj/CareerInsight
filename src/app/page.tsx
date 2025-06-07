@@ -31,18 +31,17 @@ export default function LandingPage() {
                   </Link>
                   <Link href="/signin">
                     <Button variant="outline" size="lg" className="w-full min-[400px]:w-auto group">
-                      Sign In <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      Sign In <LogIn className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
                 </div>
               </div>
               <Image
-                src="https://placehold.co/600x338.png"
-                alt="Career Dashboard Preview"
+                src="/careerinsight.png"
+                alt="CareerInsight Dashboard Preview"
                 width={600}
                 height={338}
                 className="w-full aspect-video lg:aspect-auto lg:h-full object-cover rounded-xl shadow-xl lg:order-last overflow-hidden"
-                data-ai-hint="career dashboard abstract"
                 priority
               />
             </div>
