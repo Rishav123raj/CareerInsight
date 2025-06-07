@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, LogIn, UserPlus, BrainCircuit, BarChartBig, SparklesIcon } from 'lucide-react';
 import Image from 'next/image';
-import careerInsightImage from '@/app/image/careerinsight.png'; // Import the image
 
 export default function LandingPage() {
   return (
@@ -38,13 +37,13 @@ export default function LandingPage() {
                 </div>
               </div>
               <Image
-                src={careerInsightImage} 
+                src="https://placehold.co/600x338.png"
                 alt="Career Dashboard Preview"
-                width={5000} 
-                height={2500} 
+                width={600}
+                height={338}
                 className="w-full aspect-video lg:aspect-auto lg:h-full object-cover rounded-xl shadow-xl lg:order-last overflow-hidden"
                 data-ai-hint="career dashboard abstract"
-                priority 
+                priority
               />
             </div>
           </div>
