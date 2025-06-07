@@ -2,9 +2,10 @@
 'use server';
 
 /**
- * @fileOverview AI agent that calculates an employability score based on user profile data.
+ * @fileOverview AI agent that calculates an employability score based on user profile data,
+ * provides feedback on the score's color band, and suggests improvements.
  *
- * - calculateEmployabilityScore - A function that calculates the score.
+ * - calculateEmployabilityScore - A function that calculates the score and generates feedback.
  * - CalculateEmployabilityScoreInput - The input type for the function.
  * - CalculateEmployabilityScoreOutput - The return type for the function.
  */
@@ -33,7 +34,7 @@ export type CalculateEmployabilityScoreInput = z.infer<typeof CalculateEmployabi
 
 const CalculateEmployabilityScoreOutputSchema = z.object({
   score: z.number().min(0).max(100).describe('The calculated employability score, out of 100.'),
-  feedback: z.string().optional().describe('Brief feedback or rationale for the score.'),
+  feedback: z.string().optional().describe('Detailed feedback including color band interpretation and improvement suggestions.'),
 });
 export type CalculateEmployabilityScoreOutput = z.infer<typeof CalculateEmployabilityScoreOutputSchema>;
 
@@ -47,7 +48,7 @@ const prompt = ai.definePrompt({
   name: 'calculateEmployabilityScorePrompt',
   input: {schema: CalculateEmployabilityScoreInputSchema},
   output: {schema: CalculateEmployabilityScoreOutputSchema},
-  prompt: `You are an expert employability assessor. Your task is to calculate an employability score out of 100 based on the provided student profile information.
+  prompt: `You are an expert employability assessor. Your task is to calculate an employability score out of 100 based on the provided student profile information and provide detailed feedback.
 
   Evaluate the following aspects of the student's profile and assign a weighted score. The final score should be a single number between 0 and 100.
 
@@ -65,9 +66,20 @@ const prompt = ai.definePrompt({
   - Problem Solving Skills (GitHub & LeetCode combined): 20% (Evaluate based on described activity, number of projects/problems, etc.)
   - Extracurricular Activities (Hackathons & Certifications): 10%
 
-  Based on your assessment of these categories and their respective weights, calculate a final employability score.
-  Provide a brief, one-sentence feedback explaining the score if possible.
-  Return only the score as a number and the optional feedback.
+  Color Bands & Meaning:
+  - Red (Score 0-19): "Critically Low Employability". This indicates significant foundational gaps across multiple areas. Immediate and broad-based efforts are needed.
+  - Yellow (Score 20-50): "Developing Employability". This suggests some strengths are present, but there are notable areas requiring focused improvement to become consistently job-ready.
+  - Blue (Score 51-80): "Good Employability". This signifies a strong overall profile with good potential, making the student competitive for many relevant roles. Targeted enhancements can further solidify this.
+  - Green (Score 81-100): "Excellent Employability". This represents a highly competitive and well-rounded profile, indicating strong readiness for the job market.
+
+  Based on your assessment and the calculated score:
+  1. Determine which color band the student's score falls into (Red, Yellow, Blue, or Green).
+  2. In your feedback, you MUST:
+     a. Clearly state the color band their score falls into (e.g., "Your employability score places you in the Yellow band.").
+     b. Explain what this color band signifies for their current employability status, drawing from the meanings provided above.
+     c. Provide 2-3 specific, actionable improvement suggestions. These suggestions should be tailored to help the student improve their score enough to potentially reach the *next* color band. For example, if they are in Yellow, suggest improvements to reach Blue. If they are Green, suggest how to maintain or further distinguish their strong position. Ensure these suggestions are directly related to the input profile data.
+
+  Return only the score as a number and the comprehensive feedback as a single string.
   `,
 });
 

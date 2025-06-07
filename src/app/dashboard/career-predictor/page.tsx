@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import {
   GraduationCap,
@@ -47,7 +48,6 @@ import type {
   CommitHistoryData,
   LeetCodeDifficultyData,
   LeetCodeDailyActivityData,
-  RecommendationItem,
 } from '@/lib/types';
 import { generateCareerRecommendations } from '@/ai/flows/generate-career-recommendations';
 import { suggestCareerPathways } from '@/ai/flows/suggest-career-pathways';
@@ -63,7 +63,6 @@ import {
 } from "@/components/ui/chart";
 import { Bar, BarChart, Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 
 const profileFormSchema = z.object({
@@ -158,6 +157,13 @@ const simulateLeetCodeFetch = async (username: string): Promise<LeetCodeAnalytic
     solvedByDifficulty,
     dailyActivity,
   };
+};
+
+const getScoreColorAndLabel = (score: number): { colorClass: string; progressBarClass: string; label: string } => {
+  if (score < 20) return { colorClass: 'text-red-500', progressBarClass: 'bg-red-500', label: 'Critically Low' };
+  if (score <= 50) return { colorClass: 'text-yellow-500', progressBarClass: 'bg-yellow-500', label: 'Developing' };
+  if (score <= 80) return { colorClass: 'text-blue-500', progressBarClass: 'bg-blue-500', label: 'Good' };
+  return { colorClass: 'text-green-500', progressBarClass: 'bg-green-500', label: 'Excellent' };
 };
 
 
@@ -286,6 +292,8 @@ export default function CareerPredictorPage() {
       </div>
     );
   }
+  
+  const scoreStyling = employabilityScore ? getScoreColorAndLabel(employabilityScore.score) : null;
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
@@ -389,24 +397,27 @@ export default function CareerPredictorPage() {
           {isLoading && !employabilityScore && (
             <Card className="shadow-lg animate-pulse">
               <CardHeader><CardTitle className="flex items-center gap-2"><Gauge className="text-accent" /> Employability Score</CardTitle></CardHeader>
-              <CardContent className="space-y-2 text-center py-8">
+              <CardContent className="space-y-4 text-center py-8">
                 <div className="h-10 bg-muted rounded w-1/2 mx-auto"></div>
-                <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
+                <div className="h-6 bg-muted rounded w-3/4 mx-auto mt-2"></div>
+                <div className="h-4 bg-muted rounded w-full mx-auto mt-4"></div>
               </CardContent>
             </Card>
           )}
-          {employabilityScore && (
+          {employabilityScore && scoreStyling && (
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Gauge className="text-accent" /> Employability Score</CardTitle>
+                <CardTitle className="flex items-center gap-2"><Gauge className={cn("text-primary", scoreStyling.colorClass)} /> Employability Score</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <p className="text-6xl font-bold text-primary">{employabilityScore.score}/100</p>
-                  <p className="mt-4 text-muted-foreground">
-                    {employabilityScore.feedback || "This score is dynamically calculated by AI based on your profile."}
-                  </p>
+              <CardContent className="text-center py-8 space-y-4">
+                <div>
+                  <p className={cn("text-6xl font-bold", scoreStyling.colorClass)}>{employabilityScore.score}/100</p>
+                  <p className={cn("text-lg font-semibold mt-1", scoreStyling.colorClass)}>{scoreStyling.label}</p>
                 </div>
+                <Progress value={employabilityScore.score} className="w-full h-3 [&>div]:transition-all [&>div]:duration-500" indicatorClassName={scoreStyling.progressBarClass} />
+                <p className="mt-4 text-muted-foreground text-sm text-left whitespace-pre-line">
+                  {employabilityScore.feedback || "This score is dynamically calculated by AI based on your profile."}
+                </p>
               </CardContent>
             </Card>
           )}
@@ -616,3 +627,25 @@ function FormTextareaField({ name, label, placeholder, error, control }: FormTex
     </div>
   );
 }
+
+// Extend ProgressProps to accept indicatorClassName
+interface CustomProgressProps extends React.ComponentPropsWithoutRef<typeof Progress> {
+  indicatorClassName?: string;
+}
+
+// Custom Progress component or modify the existing one if you have direct access
+// For this example, we assume Progress component can take indicatorClassName
+// If not, you would need to create a wrapper or use a different approach
+const CustomProgress = React.forwardRef<
+  React.ElementRef<typeof Progress>,
+  CustomProgressProps
+>(({ value, className, indicatorClassName, ...props }, ref) => {
+  return (
+    <Progress ref={ref} value={value} className={className} {...props}>
+      {/* This is a conceptual way to style the indicator if Progress was built this way */}
+      {/* Actual ShadCN Progress styling is internal. We achieve this by passing indicatorClassName to Progress */}
+      {/* <Progress.Indicator className={cn("h-full w-full flex-1 bg-primary transition-all", indicatorClassName)} style={{ transform: `translateX(-${100 - (value || 0)}%)` }} /> */}
+    </Progress>
+  );
+});
+CustomProgress.displayName = "CustomProgress";
