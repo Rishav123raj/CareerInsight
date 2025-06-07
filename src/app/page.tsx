@@ -30,8 +30,8 @@ export default function LandingPage() {
                     </Button>
                   </Link>
                   <Link href="/signin">
-                    <Button variant="outline" size="lg" className="w-full min-[400px]:w-auto">
-                      Sign In <LogIn className="ml-2 h-5 w-5" />
+                    <Button variant="outline" size="lg" className="w-full min-[400px]:w-auto group">
+                      Sign In <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
                 </div>
