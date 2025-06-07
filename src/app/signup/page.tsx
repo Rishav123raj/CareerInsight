@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, UserPlus, Mail, KeyRound, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { signUpUser } from '@/actions/auth'; // Import Server Action
 
 const signUpFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -28,7 +29,7 @@ const signUpFormSchema = z.object({
   confirmPassword: z.string().min(1, "Please confirm your password"),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
-  path: ["confirmPassword"], // path of error
+  path: ["confirmPassword"],
 });
 
 type SignUpFormData = z.infer<typeof signUpFormSchema>;
@@ -52,17 +53,29 @@ export default function SignUpPage() {
 
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true);
-    // Simulate API call for sign-up
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('email', data.email);
+    formData.append('password', data.password);
+    // confirmPassword is not needed by the server action if password is already validated client-side
 
-    // SIMULATED: In a real app, you'd create a user in your backend.
-    console.log("Simulated sign-up with:", data.name, data.email);
+    const result = await signUpUser(formData);
 
-    toast({
-      title: "Account Created!",
-      description: "You can now sign in with your new account.",
-    });
-    router.push('/signin'); // Redirect to sign-in page after successful sign-up
+    if (result.success) {
+      toast({
+        title: "Account Created!",
+        description: result.message || "You can now sign in with your new account.",
+      });
+      router.push('/signin');
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Sign Up Failed",
+        description: result.message || "An error occurred. Please try again.",
+      });
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -132,7 +145,7 @@ export default function SignUpPage() {
                         <Input
                           id="password"
                           type="password"
-                          placeholder="••••••••"
+                          placeholder="•••••••• (min. 6 characters)"
                           {...field}
                           className={cn("pl-10", errors.password ? 'border-destructive' : '')}
                         />

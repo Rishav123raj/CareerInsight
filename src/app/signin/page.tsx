@@ -21,10 +21,11 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, LogIn, Mail, KeyRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { signInUser } from '@/actions/auth'; // Import Server Action
 
 const signInFormSchema = z.object({
   email: z.string().email("Invalid email address").min(1, "Email is required"),
-  password: z.string().min(6, "Password must be at least 6 characters").min(1, "Password is required"),
+  password: z.string().min(1, "Password is required"), // Min 6 char check can be on server or relaxed here if server handles it
 });
 
 type SignInFormData = z.infer<typeof signInFormSchema>;
@@ -46,30 +47,31 @@ export default function SignInPage() {
 
   const onSubmit = async (data: SignInFormData) => {
     setIsLoading(true);
-    // Simulate API call for sign-in
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const formData = new FormData();
+    formData.append('email', data.email);
+    formData.append('password', data.password);
 
-    // SIMULATED: In a real app, you'd verify credentials against a backend.
-    // For this demo, any valid email/password will "work".
-    console.log("Simulated sign-in with:", data);
+    const result = await signInUser(formData);
 
-    // Simulate successful login
-    localStorage.setItem('isAuthenticated', 'true');
-    // Optionally store user info if needed, e.g., localStorage.setItem('userEmail', data.email);
-    // If user's name was captured during sign-up and you want to display it on the dashboard:
-    // const userName = localStorage.getItem('tempUserName'); // Assuming name was stored temporarily
-    // if (userName) {
-    //   localStorage.setItem('userName', userName);
-    //   localStorage.removeItem('tempUserName');
-    // }
-
-
-    toast({
-      title: "Signed In Successfully!",
-      description: "Welcome back! Redirecting you to your dashboard...",
-    });
-    router.push('/dashboard/student'); // Redirect to the new student dashboard
-    // No need to setIsLoading(false) here as we are redirecting
+    if (result.success && result.user) {
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userName', result.user.name); // Store user's name
+      
+      toast({
+        title: "Signed In Successfully!",
+        description: result.message || "Welcome back! Redirecting you to your dashboard...",
+      });
+      router.push('/dashboard/student'); 
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Sign In Failed",
+        description: result.message || "Invalid credentials or an error occurred. Please try again.",
+      });
+      setIsLoading(false);
+    }
+    // No need to setIsLoading(false) here if successful, due to redirect
   };
 
   return (
@@ -78,7 +80,7 @@ export default function SignInPage() {
         <div className="grid lg:grid-cols-2 min-h-[70vh] lg:min-h-[auto]">
           {/* Left Column: Form */}
           <div className="flex flex-col justify-center p-8 md:p-12">
-            <Card className="w-full shadow-none border-none">
+            <Card className="w-full shadow-none border-none"> {/* Adjusted Card styling */}
               <CardHeader className="text-center p-0 mb-6">
                 <div className="mx-auto mb-4">
                   <LogIn className="h-12 w-12 text-primary" />

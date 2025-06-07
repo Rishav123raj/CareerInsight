@@ -21,10 +21,11 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    // Listen for storage changes to update auth state across tabs/windows
-    const handleStorageChange = () => {
-      const authStatus = localStorage.getItem('isAuthenticated') === 'true';
-      setIsAuthenticated(authStatus);
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'isAuthenticated') {
+        const authStatus = localStorage.getItem('isAuthenticated') === 'true';
+        setIsAuthenticated(authStatus);
+      }
     };
 
     window.addEventListener('storage', handleStorageChange);
@@ -36,7 +37,7 @@ export function Header() {
 
   const handleSignOut = () => {
     localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userName'); // Also remove userName on sign out
+    localStorage.removeItem('userName'); 
     setIsAuthenticated(false);
     toast({
       title: "Signed Out",
@@ -45,7 +46,6 @@ export function Header() {
     router.push('/');
   };
 
-  // Prevents mismatched UI during hydration
   if (!isMounted) {
     return (
       <header className="bg-primary text-primary-foreground shadow-md">
@@ -55,7 +55,6 @@ export function Header() {
             <h1 className="text-2xl font-semibold tracking-tight">CareerInsight</h1>
           </Link>
           <div className="flex items-center gap-2">
-             {/* Placeholder for buttons to avoid layout shift */}
             <div className="h-10 w-24 rounded-md bg-primary/50 animate-pulse"></div>
             <div className="h-10 w-24 rounded-md bg-primary/50 animate-pulse"></div>
           </div>

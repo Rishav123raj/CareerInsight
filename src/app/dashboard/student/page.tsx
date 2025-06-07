@@ -11,14 +11,13 @@ import { Loader2, Sparkles, ArrowRight, UserCircle } from 'lucide-react';
 export default function StudentDashboardPage() {
   const router = useRouter();
   const [isAuthenticating, setIsAuthenticating] = useState(true);
-  const [userName, setUserName] = useState<string | null>(null); // Optional: personalize welcome
+  const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('isAuthenticated');
     if (isAuthenticated !== 'true') {
       router.push('/signin');
     } else {
-      // Optional: retrieve user's name if stored during sign-up/sign-in
       const storedName = localStorage.getItem('userName');
       if (storedName) {
         setUserName(storedName);
@@ -66,14 +65,7 @@ export default function StudentDashboardPage() {
             </Link>
           </CardContent>
         </Card>
-
-        {/* You can add more cards or sections here for other dashboard features in the future */}
-        {/* Example:
-        <Card className="w-full max-w-md shadow-lg">
-          <CardHeader><CardTitle>Profile Settings</CardTitle></CardHeader>
-          <CardContent><p>Manage your account details.</p></CardContent>
-        </Card>
-        */}
+        
       </div>
     </div>
   );
