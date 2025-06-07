@@ -8,14 +8,21 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UserPlus, Mail, KeyRound, UserCircle, BrainCircuit } from 'lucide-react';
+import { Loader2, UserPlus, Mail, KeyRound, UserCircle2, BrainCircuit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { signUpUser } from '@/actions/auth';
-import './signup-page-styles.css'; // Import the new CSS file
 
 const signUpFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -24,7 +31,7 @@ const signUpFormSchema = z.object({
   confirmPassword: z.string().min(1, "Please confirm your password"),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
-  path: ["confirmPassword"],
+  path: ["confirmPassword"], // Apply error to confirmPassword field
 });
 
 type SignUpFormData = z.infer<typeof signUpFormSchema>;
@@ -73,119 +80,134 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="signup-page-wrapper">
-      <div className="signup-container">
-        <div className="login-box"> {/* This class wraps both sections */}
-          <div className="form-section">
-            <div className="flex items-center justify-center mb-3 logo">
-              <BrainCircuit size={28} className="mr-2" /> CareerInsight
-            </div>
-            <p className="welcome">Create your account to get started!</p>
-            <h2>Sign Up</h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-1"> {/* Reduced space-y for custom margins */}
-              
-              <div className="input-wrapper">
-                <Label htmlFor="name" className={cn(errors.name ? 'text-destructive' : '')}>Full Name</Label>
-                 <UserCircle className="h-5 w-5" />
-                <Controller
-                  name="name"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      id="name"
-                      placeholder="Your Name"
-                      {...field}
-                      data-geist-input="true" 
-                      className={cn(errors.name ? 'border-destructive' : '')}
-                    />
-                  )}
-                />
-                {errors.name && <p className="error-message">{errors.name.message}</p>}
-              </div>
+    <div className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.16))] bg-muted/40 py-8 px-4">
+      <div className="w-full max-w-4xl lg:max-w-5xl rounded-xl shadow-2xl bg-card overflow-hidden">
+        <div className="grid lg:grid-cols-2 min-h-[70vh] lg:min-h-[auto]">
+          {/* Left Column: Form */}
+          <div className="flex flex-col justify-center p-8 md:p-12">
+            <Card className="w-full shadow-none border-none">
+              <CardHeader className="text-center p-0 mb-6">
+                <div className="mx-auto mb-4 flex items-center justify-center text-primary">
+                  <BrainCircuit className="h-10 w-10 mr-2" />
+                  <UserPlus className="h-12 w-12" />
+                </div>
+                <CardTitle className="text-3xl font-bold">Create an Account</CardTitle>
+                <CardDescription>Join CareerInsight to unlock your potential.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4"> {/* Adjusted space-y */}
+                  
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className={cn(errors.name ? 'text-destructive' : '')}>Full Name</Label>
+                    <div className="relative">
+                      <UserCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Controller
+                        name="name"
+                        control={control}
+                        render={({ field }) => (
+                          <Input
+                            id="name"
+                            placeholder="Your Name"
+                            {...field}
+                            className={cn("pl-10", errors.name ? 'border-destructive' : '')}
+                          />
+                        )}
+                      />
+                    </div>
+                    {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+                  </div>
 
-              <div className="input-wrapper">
-                <Label htmlFor="email" className={cn(errors.email ? 'text-destructive' : '')}>Email</Label>
-                <Mail className="h-5 w-5" />
-                <Controller
-                  name="email"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      {...field}
-                      data-geist-input="true"
-                      className={cn(errors.email ? 'border-destructive' : '')}
-                    />
-                  )}
-                />
-                {errors.email && <p className="error-message">{errors.email.message}</p>}
-              </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className={cn(errors.email ? 'text-destructive' : '')}>Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Controller
+                        name="email"
+                        control={control}
+                        render={({ field }) => (
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder="you@example.com"
+                            {...field}
+                            className={cn("pl-10", errors.email ? 'border-destructive' : '')}
+                          />
+                        )}
+                      />
+                    </div>
+                    {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+                  </div>
 
-              <div className="input-wrapper">
-                <Label htmlFor="password" className={cn(errors.password ? 'text-destructive' : '')}>Password</Label>
-                <KeyRound className="h-5 w-5" />
-                <Controller
-                  name="password"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Min. 6 characters"
-                      {...field}
-                      data-geist-input="true"
-                      className={cn(errors.password ? 'border-destructive' : '')}
-                    />
-                  )}
-                />
-                {errors.password && <p className="error-message">{errors.password.message}</p>}
-              </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password" className={cn(errors.password ? 'text-destructive' : '')}>Password</Label>
+                    <div className="relative">
+                      <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Controller
+                        name="password"
+                        control={control}
+                        render={({ field }) => (
+                          <Input
+                            id="password"
+                            type="password"
+                            placeholder="Min. 6 characters"
+                            {...field}
+                            className={cn("pl-10", errors.password ? 'border-destructive' : '')}
+                          />
+                        )}
+                      />
+                    </div>
+                    {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+                  </div>
 
-              <div className="input-wrapper">
-                <Label htmlFor="confirmPassword" className={cn(errors.confirmPassword ? 'text-destructive' : '')}>Confirm Password</Label>
-                <KeyRound className="h-5 w-5" />
-                <Controller
-                  name="confirmPassword"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Re-enter password"
-                      {...field}
-                      data-geist-input="true"
-                      className={cn(errors.confirmPassword ? 'border-destructive' : '')}
-                    />
-                  )}
-                />
-                {errors.confirmPassword && <p className="error-message">{errors.confirmPassword.message}</p>}
-              </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="confirmPassword" className={cn(errors.confirmPassword ? 'text-destructive' : '')}>Confirm Password</Label>
+                    <div className="relative">
+                      <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Controller
+                        name="confirmPassword"
+                        control={control}
+                        render={({ field }) => (
+                          <Input
+                            id="confirmPassword"
+                            type="password"
+                            placeholder="Re-enter password"
+                            {...field}
+                            className={cn("pl-10", errors.confirmPassword ? 'border-destructive' : '')}
+                          />
+                        )}
+                      />
+                    </div>
+                    {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
+                  </div>
 
-              <Button type="submit" disabled={isLoading} className="signin-btn mt-4">
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                ) : (
-                  "Sign Up"
-                )}
-              </Button>
-            </form>
-            <p className="login-prompt-text">
-              Already have an account?{' '}
-              <Link href="/signin">
-                Sign In
-              </Link>
-            </p>
+                  <Button type="submit" disabled={isLoading} className="w-full text-lg py-6 mt-2"> {/* Added mt-2 */}
+                    {isLoading ? (
+                      <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                    ) : (
+                       "Sign Up"
+                    )}
+                  </Button>
+                </form>
+                 <CardFooter className="flex-col items-start p-0 mt-6">
+                    <p className="text-center text-sm text-muted-foreground w-full">
+                    Already have an account?{' '}
+                    <Link href="/signin" className="font-medium text-primary hover:underline">
+                        Sign In
+                    </Link>
+                    </p>
+                </CardFooter>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="image-section">
+          {/* Right Column: Image */}
+          <div className="hidden lg:flex items-center justify-center bg-gradient-to-br from-primary/5 via-accent/5 to-background p-8 md:p-12 relative">
             <Image
-              src="https://img.freepik.com/premium-vector/woman-with-laptop-showing_126609-931.jpg?semt=ais_hybrid&w=740"
-              alt="Illustration of a person with a laptop creating an account"
-              width={550}
-              height={550}
-              className="object-contain" 
+              src="https://img.freepik.com/premium-vector/woman-with-laptop-showing_126609-931.jpg?w=740"
+              alt="Illustration of a person signing up"
+              width={500} 
+              height={500} 
+              className="object-contain rounded-lg shadow-md"
               priority
               data-ai-hint="woman laptop illustration"
             />
