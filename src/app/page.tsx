@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, LogIn, UserPlus, BrainCircuit, BarChartBig, SparklesIcon } from 'lucide-react';
 import Image from 'next/image';
+import careerInsightImage from '@/image/careerinsight.png'; // Import the local image
 
 export default function LandingPage() {
   return (
@@ -37,7 +38,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <Image
-                src="/careerinsight.png"
+                src={careerInsightImage}
                 alt="CareerInsight Dashboard Preview"
                 width={600}
                 height={338}
@@ -139,4 +140,3 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
     </div>
   );
 }
-
