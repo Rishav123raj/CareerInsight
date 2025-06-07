@@ -43,6 +43,7 @@ export default function LandingPage() {
                 height={338}
                 className="w-full aspect-video lg:aspect-auto lg:h-full object-cover rounded-xl shadow-xl lg:order-last overflow-hidden"
                 priority
+                data-ai-hint="career dashboard"
               />
             </div>
           </div>
@@ -138,3 +139,4 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
     </div>
   );
 }
+
