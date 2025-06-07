@@ -258,12 +258,24 @@ export default function CareerPredictorPage() {
       }
       await Promise.all(analyticsPromises);
 
-    } catch (error) {
-      console.error("Processing error:", error);
+    } catch (error: any) {
+      console.error("🔴 Full error object during insights/analytics generation:", error);
+      let description = "An error occurred while processing your request. Please try again. Check server logs for details.";
+      if (error instanceof Error) {
+        console.error("Error Name:", error.name);
+        console.error("Error Message:", error.message);
+        console.error("Error Stack:", error.stack);
+        description = `Failed: ${error.message}. Check server logs for more details.`;
+      } else if (typeof error === 'string') {
+        description = error;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        description = `Failed: ${String(error.message)}. Check server logs for more details.`;
+      }
+
       toast({
         variant: "destructive",
         title: "Error Generating Insights or Analytics",
-        description: "An error occurred while processing your request. Please try again.",
+        description: description,
       });
       setIsLoading(false);
     } finally {
@@ -649,3 +661,4 @@ const CustomProgress = React.forwardRef<
   );
 });
 CustomProgress.displayName = "CustomProgress";
+
