@@ -78,7 +78,8 @@ const generateCareerRecommendationsFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     if (!output) {
-        throw new Error("Failed to get a response from the AI for career recommendations.");
+        console.error("generateCareerRecommendationsFlow: AI did not return an output for the given input:", input);
+        throw new Error("AI failed to generate career recommendations. No output received from model.");
     }
     return output;
   }

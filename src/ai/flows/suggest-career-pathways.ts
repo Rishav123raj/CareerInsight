@@ -1,3 +1,4 @@
+
 // src/ai/flows/suggest-career-pathways.ts
 'use server';
 
@@ -72,6 +73,10 @@ const suggestCareerPathwaysFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      console.error("suggestCareerPathwaysFlow: AI did not return an output for the given input:", input);
+      throw new Error("AI failed to suggest career pathways. No output received from model.");
+    }
+    return output;
   }
 );

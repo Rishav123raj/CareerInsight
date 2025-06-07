@@ -259,17 +259,19 @@ export default function CareerPredictorPage() {
       await Promise.all(analyticsPromises);
 
     } catch (error: any) {
-      console.error("🔴 Full error object during insights/analytics generation:", error);
+      console.error("🔴 Full error object during insights/analytics generation (CLIENT-SIDE CATCH):");
+      console.error("Error Name:", error?.name);
+      console.error("Error Message:", error?.message);
+      console.error("Error Stack:", error?.stack);
+      console.error("Full Error Object (Client):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+      
       let description = "An error occurred while processing your request. Please try again. Check server logs for details.";
       if (error instanceof Error) {
-        console.error("Error Name:", error.name);
-        console.error("Error Message:", error.message);
-        console.error("Error Stack:", error.stack);
-        description = `Failed: ${error.message}. Check server logs for more details.`;
+        description = `Failed: ${error.message}. Check server console (terminal) for more details and potential causes like API key issues.`;
       } else if (typeof error === 'string') {
         description = error;
       } else if (error && typeof error === 'object' && 'message' in error) {
-        description = `Failed: ${String(error.message)}. Check server logs for more details.`;
+        description = `Failed: ${String(error.message)}. Check server console (terminal) for more details.`;
       }
 
       toast({
@@ -661,4 +663,3 @@ const CustomProgress = React.forwardRef<
   );
 });
 CustomProgress.displayName = "CustomProgress";
-
