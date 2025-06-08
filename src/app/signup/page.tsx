@@ -31,7 +31,7 @@ const signUpFormSchema = z.object({
   confirmPassword: z.string().min(1, "Please confirm your password"),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
-  path: ["confirmPassword"], // Apply error to confirmPassword field
+  path: ["confirmPassword"], 
 });
 
 type SignUpFormData = z.infer<typeof signUpFormSchema>;
@@ -80,27 +80,27 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.16))] bg-muted/40 py-8 px-4">
-      <div className="w-full max-w-4xl lg:max-w-5xl rounded-xl shadow-2xl bg-card overflow-hidden">
-        <div className="grid lg:grid-cols-2 min-h-[70vh] lg:min-h-[auto]">
-          {/* Left Column: Form */}
-          <div className="flex flex-col justify-center p-8 md:p-12">
+    <div className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.16))] bg-muted/40 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-5xl rounded-xl shadow-2xl bg-card overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[70vh] lg:min-h-[auto]">
+          {/* Form Section */}
+          <div className="flex flex-col justify-center p-6 sm:p-8 md:p-12">
             <Card className="w-full shadow-none border-none">
               <CardHeader className="text-center p-0 mb-6">
-                <div className="mx-auto mb-4 flex items-center justify-center text-primary">
-                  <BrainCircuit className="h-10 w-10 mr-2" />
-                  <UserPlus className="h-12 w-12" />
+                <div className="mx-auto mb-3 sm:mb-4 flex items-center justify-center text-primary">
+                  <BrainCircuit className="h-8 w-8 sm:h-10 sm:w-10 mr-2" />
+                  <UserPlus className="h-10 w-10 sm:h-12 sm:w-12" />
                 </div>
-                <CardTitle className="text-3xl font-bold">Create an Account</CardTitle>
-                <CardDescription>Join CareerInsight to unlock your potential.</CardDescription>
+                <CardTitle className="text-2xl sm:text-3xl font-bold">Create an Account</CardTitle>
+                <CardDescription className="text-sm sm:text-base">Join CareerInsight to unlock your potential.</CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4"> {/* Adjusted space-y */}
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4"> 
                   
-                  <div className="space-y-1.5">
-                    <Label htmlFor="name" className={cn(errors.name ? 'text-destructive' : '')}>Full Name</Label>
+                  <div className="space-y-1 sm:space-y-1.5">
+                    <Label htmlFor="name" className={cn("text-sm", errors.name ? 'text-destructive' : '')}>Full Name</Label>
                     <div className="relative">
-                      <UserCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <UserCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       <Controller
                         name="name"
                         control={control}
@@ -109,7 +109,7 @@ export default function SignUpPage() {
                             id="name"
                             placeholder="Your Name"
                             {...field}
-                            className={cn("pl-10", errors.name ? 'border-destructive' : '')}
+                            className={cn("pl-10 text-sm sm:text-base", errors.name ? 'border-destructive' : '')}
                           />
                         )}
                       />
@@ -117,10 +117,10 @@ export default function SignUpPage() {
                     {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="email" className={cn(errors.email ? 'text-destructive' : '')}>Email</Label>
+                  <div className="space-y-1 sm:space-y-1.5">
+                    <Label htmlFor="email" className={cn("text-sm", errors.email ? 'text-destructive' : '')}>Email</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       <Controller
                         name="email"
                         control={control}
@@ -130,7 +130,7 @@ export default function SignUpPage() {
                             type="email"
                             placeholder="you@example.com"
                             {...field}
-                            className={cn("pl-10", errors.email ? 'border-destructive' : '')}
+                            className={cn("pl-10 text-sm sm:text-base", errors.email ? 'border-destructive' : '')}
                           />
                         )}
                       />
@@ -138,10 +138,10 @@ export default function SignUpPage() {
                     {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="password" className={cn(errors.password ? 'text-destructive' : '')}>Password</Label>
+                  <div className="space-y-1 sm:space-y-1.5">
+                    <Label htmlFor="password" className={cn("text-sm", errors.password ? 'text-destructive' : '')}>Password</Label>
                     <div className="relative">
-                      <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       <Controller
                         name="password"
                         control={control}
@@ -151,7 +151,7 @@ export default function SignUpPage() {
                             type="password"
                             placeholder="Min. 6 characters"
                             {...field}
-                            className={cn("pl-10", errors.password ? 'border-destructive' : '')}
+                            className={cn("pl-10 text-sm sm:text-base", errors.password ? 'border-destructive' : '')}
                           />
                         )}
                       />
@@ -159,10 +159,10 @@ export default function SignUpPage() {
                     {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="confirmPassword" className={cn(errors.confirmPassword ? 'text-destructive' : '')}>Confirm Password</Label>
+                  <div className="space-y-1 sm:space-y-1.5">
+                    <Label htmlFor="confirmPassword" className={cn("text-sm", errors.confirmPassword ? 'text-destructive' : '')}>Confirm Password</Label>
                     <div className="relative">
-                      <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       <Controller
                         name="confirmPassword"
                         control={control}
@@ -172,7 +172,7 @@ export default function SignUpPage() {
                             type="password"
                             placeholder="Re-enter password"
                             {...field}
-                            className={cn("pl-10", errors.confirmPassword ? 'border-destructive' : '')}
+                            className={cn("pl-10 text-sm sm:text-base", errors.confirmPassword ? 'border-destructive' : '')}
                           />
                         )}
                       />
@@ -180,15 +180,15 @@ export default function SignUpPage() {
                     {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
                   </div>
 
-                  <Button type="submit" disabled={isLoading} className="w-full text-lg py-6 mt-2"> {/* Added mt-2 */}
+                  <Button type="submit" disabled={isLoading} className="w-full text-base sm:text-lg py-3 sm:py-6 mt-2"> 
                     {isLoading ? (
-                      <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                      <Loader2 className="mr-2 h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                     ) : (
                        "Sign Up"
                     )}
                   </Button>
                 </form>
-                 <CardFooter className="flex-col items-start p-0 mt-6">
+                 <CardFooter className="flex-col items-start p-0 mt-5 sm:mt-6">
                     <p className="text-center text-sm text-muted-foreground w-full">
                     Already have an account?{' '}
                     <Link href="/signin" className="font-medium text-primary hover:underline">
@@ -200,14 +200,14 @@ export default function SignUpPage() {
             </Card>
           </div>
 
-          {/* Right Column: Image */}
-          <div className="hidden lg:flex items-center justify-center bg-gradient-to-br from-primary/5 via-accent/5 to-background p-8 md:p-12 relative">
+          {/* Image Section */}
+          <div className="flex order-first lg:order-last items-center justify-center bg-gradient-to-br from-primary/5 via-accent/5 to-background p-6 sm:p-8 md:p-12 relative">
             <Image
               src="https://img.freepik.com/premium-vector/woman-with-laptop-showing_126609-931.jpg?w=740"
               alt="Illustration of a person signing up"
               width={500} 
               height={500} 
-              className="object-contain rounded-lg shadow-md"
+              className="w-full max-w-[280px] h-auto sm:max-w-[320px] md:max-w-[380px] lg:max-w-[450px] object-contain rounded-lg"
               priority
               data-ai-hint="woman laptop illustration"
             />

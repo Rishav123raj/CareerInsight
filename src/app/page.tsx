@@ -5,22 +5,22 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, LogIn, UserPlus, BrainCircuit, BarChartBig, SparklesIcon } from 'lucide-react';
 import Image from 'next/image';
-import careerInsightImage from '@/image/careerinsight.png'; // Import the local image
+import careerInsightImage from '@/image/careerinsight.png'; 
 
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-theme(spacing.16))]"> {/* Adjust for header height */}
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-br from-primary/10 via-background to-background">
+        <section className="w-full py-12 md:py-20 lg:py-28 xl:py-32 bg-gradient-to-br from-primary/10 via-background to-background">
           <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
-              <div className="flex flex-col justify-center space-y-4">
+            <div className="grid grid-cols-1 gap-8 items-center lg:grid-cols-[1fr_450px] lg:gap-12 xl:grid-cols-[1fr_550px]">
+              <div className="flex flex-col justify-center space-y-4 md:space-y-6">
                 <div className="space-y-2">
-                  <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-foreground">
+                  <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl xl:text-6xl/none text-foreground">
                     Unlock Your Career Potential with
                     <span className="text-primary"> CareerInsight</span>
                   </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                  <p className="max-w-[600px] text-muted-foreground text-base md:text-lg xl:text-xl">
                     Get personalized, AI-driven insights into your employability, discover tailored career paths, and receive actionable recommendations to boost your professional journey.
                   </p>
                 </div>
@@ -40,9 +40,9 @@ export default function LandingPage() {
               <Image
                 src={careerInsightImage}
                 alt="CareerInsight Dashboard Preview"
-                width={600}
-                height={338}
-                className="w-full aspect-video lg:aspect-auto lg:h-full object-cover rounded-xl shadow-xl lg:order-last overflow-hidden"
+                width={600} 
+                height={338} 
+                className="w-full max-h-[300px] sm:max-h-[350px] md:max-h-[400px] lg:max-h-full object-contain rounded-xl shadow-xl lg:order-last overflow-hidden"
                 priority
                 data-ai-hint="career dashboard"
               />
@@ -57,15 +57,15 @@ export default function LandingPage() {
                 <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm text-secondary-foreground">
                   Key Features
                 </div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-foreground">
+                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl text-foreground">
                   Why Choose CareerInsight?
                 </h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                <p className="max-w-[900px] text-muted-foreground text-base md:text-lg/relaxed xl:text-xl/relaxed">
                   Our platform analyzes your unique profile to deliver insights that truly matter for your career growth.
                 </p>
               </div>
             </div>
-            <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-3 lg:gap-16 mt-12">
+            <div className="mx-auto grid max-w-5xl items-start gap-6 sm:grid-cols-2 md:gap-8 lg:grid-cols-3 lg:gap-12 mt-10 md:mt-12">
               <FeatureCard
                 icon={<BrainCircuit className="h-8 w-8 text-primary" />}
                 title="AI-Powered Employability Score"
@@ -88,10 +88,10 @@ export default function LandingPage() {
         <section className="w-full py-12 md:py-24 lg:py-32 border-t">
           <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
             <div className="space-y-3">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-foreground">
+              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl/tight text-foreground">
                 Ready to Supercharge Your Career?
               </h2>
-              <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="mx-auto max-w-[600px] text-muted-foreground text-base md:text-lg/relaxed xl:text-xl/relaxed">
                 Sign up today and take the first step towards a more informed and successful professional future.
               </p>
             </div>
@@ -131,7 +131,7 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <div className="flex flex-col items-start space-y-2 p-6 rounded-lg bg-card shadow-lg hover:shadow-xl transition-shadow">
+    <div className="flex flex-col items-start space-y-2 p-6 rounded-lg bg-card shadow-lg hover:shadow-xl transition-shadow h-full">
       <div className="p-3 rounded-md bg-primary/10 flex items-center justify-center mb-2">
         {icon}
       </div>
