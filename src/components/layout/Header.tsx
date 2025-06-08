@@ -7,7 +7,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader, // Added
+  SheetTitle,   // Added
+  SheetTrigger,
+  SheetClose
+} from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 
 export function Header() {
@@ -48,7 +55,7 @@ export function Header() {
 
   const handleSignOut = () => {
     localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userName'); 
+    localStorage.removeItem('userName');
     setIsAuthenticated(false);
     toast({
       title: "Signed Out",
@@ -72,7 +79,7 @@ export function Header() {
       </Button>
     </Link>
   );
-  
+
   const AuthButton = ({ children, onClick, isPrimary = false }: { children: React.ReactNode, onClick?: () => void, isPrimary?: boolean }) => (
     <Button
       variant={isPrimary ? "secondary" : "ghost"}
@@ -95,7 +102,7 @@ export function Header() {
       <header className="bg-primary text-primary-foreground shadow-md sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <BrainCircuit size={28} />
+            <BrainCircuit size={28} className="sm:h-7 sm:w-7" />
             <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">CareerInsight</h1>
           </Link>
           <div className="flex items-center gap-2">
@@ -111,7 +118,7 @@ export function Header() {
     <header className="bg-primary text-primary-foreground shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <BrainCircuit size={28} />
+          <BrainCircuit size={28} className="sm:h-7 sm:w-7" />
           <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">CareerInsight</h1>
         </Link>
 
@@ -151,46 +158,46 @@ export function Header() {
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] bg-primary text-primary-foreground p-0">
-              <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between p-4 border-b border-primary/50">
-                    <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-                        <BrainCircuit size={24} />
-                        <h1 className="text-lg font-semibold tracking-tight">CareerInsight</h1>
-                    </Link>
-                    <SheetClose asChild>
-                        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80">
-                            <X className="h-6 w-6" />
-                            <span className="sr-only">Close menu</span>
-                        </Button>
-                    </SheetClose>
-                </div>
-                <nav className="flex flex-col gap-2 p-4">
-                  {isAuthenticated ? (
-                    <>
-                      <NavLink href="/dashboard/student">
-                        <LayoutDashboard className="mr-2 h-5 w-5" /> Dashboard
-                      </NavLink>
-                      <AuthButton onClick={handleSignOut} isPrimary>
-                        <LogOut className="mr-2 h-5 w-5" /> Sign Out
+            <SheetContent side="right" className="w-[280px] bg-primary text-primary-foreground p-0 flex flex-col">
+              <SheetHeader className="flex flex-row items-center justify-between p-4 border-b border-primary/50">
+                <SheetTitle asChild>
+                  <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 hover:opacity-90 transition-opacity text-primary-foreground">
+                      <BrainCircuit size={24} />
+                      <span className="text-lg font-semibold tracking-tight">CareerInsight</span>
+                  </Link>
+                </SheetTitle>
+                <SheetClose asChild>
+                    <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80">
+                        <X className="h-6 w-6" />
+                        <span className="sr-only">Close menu</span>
+                    </Button>
+                </SheetClose>
+              </SheetHeader>
+              <nav className="flex flex-col gap-2 p-4">
+                {isAuthenticated ? (
+                  <>
+                    <NavLink href="/dashboard/student">
+                      <LayoutDashboard className="mr-2 h-5 w-5" /> Dashboard
+                    </NavLink>
+                    <AuthButton onClick={handleSignOut} isPrimary>
+                      <LogOut className="mr-2 h-5 w-5" /> Sign Out
+                    </AuthButton>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/signin" passHref>
+                      <AuthButton>
+                         <LogIn className="mr-2 h-5 w-5" /> Sign In
                       </AuthButton>
-                    </>
-                  ) : (
-                    <>
-                      <Link href="/signin" passHref>
-                        <AuthButton>
-                           <LogIn className="mr-2 h-5 w-5" /> Sign In
-                        </AuthButton>
-                      </Link>
-                      <Link href="/signup" passHref>
-                        <AuthButton isPrimary>
-                          <UserPlus className="mr-2 h-5 w-5" /> Sign Up
-                        </AuthButton>
-                      </Link>
-                    </>
-                  )}
-                </nav>
-              </div>
+                    </Link>
+                    <Link href="/signup" passHref>
+                      <AuthButton isPrimary>
+                        <UserPlus className="mr-2 h-5 w-5" /> Sign Up
+                      </AuthButton>
+                    </Link>
+                  </>
+                )}
+              </nav>
             </SheetContent>
           </Sheet>
         </div>
