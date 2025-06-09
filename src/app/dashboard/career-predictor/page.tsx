@@ -37,6 +37,9 @@ import {
   Package,
   ChevronRight,
   BookOpenCheck,
+  BookMarked, // Added for books
+  Youtube, // Added for YouTube
+  Link as LinkIcon, // Generic link icon
 } from 'lucide-react';
 import type {
   ProfileFormData,
@@ -48,6 +51,8 @@ import type {
   CommitHistoryData,
   LeetCodeDifficultyData,
   LeetCodeDailyActivityData,
+  LearningResource, // Import the new type
+  ResourceType, // Import ResourceType
 } from '@/lib/types';
 import { generateCareerRecommendations } from '@/ai/flows/generate-career-recommendations';
 import { suggestCareerPathways } from '@/ai/flows/suggest-career-pathways';
@@ -63,6 +68,7 @@ import {
 } from "@/components/ui/chart";
 import { Bar, BarChart, Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 
 const profileFormSchema = z.object({
@@ -164,6 +170,20 @@ const getScoreColorAndLabel = (score: number): { colorClass: string; progressBar
   if (score <= 50) return { colorClass: 'text-yellow-500', progressBarClass: 'bg-yellow-500', label: 'Developing' };
   if (score <= 80) return { colorClass: 'text-blue-500', progressBarClass: 'bg-blue-500', label: 'Good' };
   return { colorClass: 'text-green-500', progressBarClass: 'bg-green-500', label: 'Excellent' };
+};
+
+const ResourceIcon = ({ type }: { type: ResourceType }) => {
+  const iconSize = "h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary";
+  switch (type) {
+    case 'course':
+      return <BookOpenCheck className={iconSize} />;
+    case 'book/pdf':
+      return <BookMarked className={iconSize} />;
+    case 'youtube_video/channel':
+      return <Youtube className={iconSize} />;
+    default:
+      return <LinkIcon className={iconSize} />;
+  }
 };
 
 
@@ -448,19 +468,28 @@ export default function CareerPredictorPage() {
                 <CardTitle className="flex items-center gap-2 text-lg sm:text-xl"><Sparkles className="text-accent h-5 w-5 sm:h-6 sm:w-6" /> AI Recommendations</CardTitle>
               </CardHeader>
               <CardContent className="p-4 sm:p-6">
-                <h3 className="font-semibold text-base sm:text-lg mb-2">Personalized Actions & Learning:</h3>
+                <h3 className="font-semibold text-base sm:text-lg mb-3">Personalized Actions & Learning:</h3>
                 {recommendations.recommendations.map((recItem, index) => (
-                  <div key={index} className="mb-3 sm:mb-4 pb-2 sm:pb-3 border-b last:border-b-0 last:pb-0 last:mb-0">
-                    <p className="text-xs sm:text-sm text-foreground mb-1 sm:mb-1.5">{recItem.action}</p>
-                    {recItem.suggestedLearningResources && recItem.suggestedLearningResources.length > 0 && (
-                      <div className="mt-1">
-                        <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1.5">
-                          <BookOpenCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary" />
-                          Suggested Learning:
-                        </p>
-                        <ul className="list-disc pl-4 sm:pl-5 space-y-0.5">
-                          {recItem.suggestedLearningResources.map((resource, rIndex) => (
-                            <li key={rIndex} className="text-xs text-muted-foreground/90">{resource}</li>
+                  <div key={index} className="mb-4 sm:mb-5 pb-3 sm:pb-4 border-b last:border-b-0 last:pb-0 last:mb-0">
+                    <p className="text-sm sm:text-base text-foreground font-medium mb-2">{recItem.action}</p>
+                    {recItem.suggestedResources && recItem.suggestedResources.length > 0 && (
+                      <div className="mt-1.5 space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground mb-1">Suggested Learning Resources:</p>
+                        <ul className="space-y-1.5">
+                          {recItem.suggestedResources.map((resource, rIndex) => (
+                            <li key={rIndex} className="text-xs text-muted-foreground/90 flex items-start gap-2">
+                              <ResourceIcon type={resource.type} />
+                              <div className="flex-1">
+                                {resource.url ? (
+                                  <Link href={resource.url} target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-primary font-medium text-foreground">
+                                    {resource.title}
+                                  </Link>
+                                ) : (
+                                  <span className="font-medium text-foreground">{resource.title}</span>
+                                )}
+                                {resource.description && <p className="text-xs text-muted-foreground/80 mt-0.5">{resource.description}</p>}
+                              </div>
+                            </li>
                           ))}
                         </ul>
                       </div>
@@ -619,7 +648,7 @@ function FormField({ name, label, placeholder, error, icon, control }: FormField
       <Controller
         name={name}
         control={control}
-        render={({ field }) => <Input id={name} placeholder={placeholder} {...field} className={cn("text-sm", error ? 'border-destructive' : '')} />}
+        render={({ field }) => <Input id={name} placeholder={placeholder} {...field} className={cn("text-sm sm:text-base", error ? 'border-destructive' : '')} />}
       />
       {error && <p className="text-xs text-destructive">{error.message}</p>}
     </div>
@@ -635,7 +664,7 @@ function FormTextareaField({ name, label, placeholder, error, control }: FormTex
       <Controller
         name={name}
         control={control}
-        render={({ field }) => <Textarea id={name} placeholder={placeholder} {...field} className={cn("min-h-[70px] sm:min-h-[80px] text-sm", error ? 'border-destructive' : '')} />}
+        render={({ field }) => <Textarea id={name} placeholder={placeholder} {...field} className={cn("min-h-[70px] sm:min-h-[80px] text-sm sm:text-base", error ? 'border-destructive' : '')} />}
       />
       {error && <p className="text-xs text-destructive">{error.message}</p>}
     </div>
@@ -657,3 +686,4 @@ const CustomProgress = React.forwardRef<
   );
 });
 CustomProgress.displayName = "CustomProgress";
+

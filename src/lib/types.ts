@@ -31,9 +31,18 @@ export interface ProfileFormData {
 }
 
 // For AI results
+export type ResourceType = "course" | "book/pdf" | "youtube_video/channel";
+
+export interface LearningResource {
+  type: ResourceType;
+  title: string;
+  url?: string; // Optional, as not all books/PDFs will have a direct general URL
+  description?: string; // e.g., "Search on Project Gutenberg", "Official Documentation"
+}
+
 export interface RecommendationItem {
   action: string; // The actual recommendation
-  suggestedLearningResources: string[]; // Suggested courses/resources for this action
+  suggestedResources: LearningResource[]; // Updated from string[]
 }
 
 export interface CareerRecommendation {
