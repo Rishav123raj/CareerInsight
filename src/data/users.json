@@ -1,14 +1,17 @@
+
 [
   {
     "id": "af779ecf-d68c-4023-9c7c-05c960174e47",
     "name": "Rishav Raj Bhagat",
     "email": "rishavrajbhagat123@gmail.com",
-    "password": "$2a$10$GW/h8RGnEJXRjCchAWVHcOWrEFKIXtTK8V8a2v05KQDgEWDHtzuWm"
+    "password": "$2a$10$GW/h8RGnEJXRjCchAWVHcOWrEFKIXtTK8V8a2v05KQDgEWDHtzuWm",
+    "createdAt": "2024-01-01T10:00:00.000Z"
   },
   {
     "id": "78e31f44-6182-4abd-9212-2e845cb85c6a",
     "name": "Abhishek Kumar Ojha",
     "email": "infoojhaabhishek@gmail.com",
-    "password": "$2a$10$gfp/OV.AyLajgTdhmZLc0erUCIXWlwLH2WwVYPmVhl.R69c5ZKuTy"
+    "password": "$2a$10$gfp/OV.AyLajgTdhmZLc0erUCIXWlwLH2WwVYPmVhl.R69c5ZKuTy",
+    "createdAt": "2024-01-02T12:00:00.000Z"
   }
 ]

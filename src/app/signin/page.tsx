@@ -21,13 +21,11 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, LogIn, Mail, KeyRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { signInUser } from '@/actions/auth'; 
-import { auth } from '@/lib/firebase'; // Import Firebase auth
-import { onAuthStateChanged } from 'firebase/auth';
+import { signInUser } from '@/actions/auth';
 
 const signInFormSchema = z.object({
   email: z.string().email("Invalid email address").min(1, "Email is required"),
-  password: z.string().min(1, "Password is required"), 
+  password: z.string().min(1, "Password is required"),
 });
 
 type SignInFormData = z.infer<typeof signInFormSchema>;
@@ -39,14 +37,13 @@ export default function SignInPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.push('/dashboard/student'); // Redirect if already logged in
-      } else {
-        setIsCheckingAuth(false);
-      }
-    });
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    // Check if user is already authenticated via localStorage
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    if (isAuthenticated === 'true') {
+      router.push('/dashboard/student');
+    } else {
+      setIsCheckingAuth(false);
+    }
   }, [router]);
 
   const form = useForm<SignInFormData>({
@@ -61,22 +58,22 @@ export default function SignInPage() {
 
   const onSubmit = async (data: SignInFormData) => {
     setIsLoading(true);
-    
+
     const formData = new FormData();
     formData.append('email', data.email);
     formData.append('password', data.password);
 
-    // The signInUser action now uses Firebase and doesn't directly manage client session
-    // Firebase onAuthStateChanged will handle the redirect after successful Firebase sign-in
     const result = await signInUser(formData);
 
-    if (result.success) {
+    if (result.success && result.user) {
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userName', result.user.name); // Store user's name
+      localStorage.setItem('userEmail', result.user.email); // Store user's email
       toast({
         title: "Signed In Successfully!",
         description: result.message || "Welcome back! Redirecting you...",
       });
-      // Redirection is now handled by onAuthStateChanged effect
-      // router.push('/dashboard/student'); 
+      router.push('/dashboard/student');
     } else {
       toast({
         variant: "destructive",
@@ -86,7 +83,7 @@ export default function SignInPage() {
       setIsLoading(false);
     }
   };
-  
+
   if (isCheckingAuth) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.16))]">
@@ -101,7 +98,7 @@ export default function SignInPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[70vh] lg:min-h-[auto]">
           {/* Form Section */}
           <div className="flex flex-col justify-center p-6 sm:p-8 md:p-12">
-            <Card className="w-full shadow-none border-none"> 
+            <Card className="w-full shadow-none border-none">
               <CardHeader className="text-center p-0 mb-6">
                 <div className="mx-auto mb-4">
                   <LogIn className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
@@ -173,15 +170,15 @@ export default function SignInPage() {
 
           {/* Image Section */}
           <div className="hidden lg:flex order-first lg:order-last items-center justify-center bg-gradient-to-br from-primary/5 via-accent/5 to-background p-6 sm:p-8 md:p-12 relative">
-            <Image
-              src="https://media.istockphoto.com/id/1178763127/vector/man-with-laptop-sitting-on-the-chair-freelance-or-studying-concept-cute-illustration-in-flat.jpg?s=612x612&w=0&k=20&c=gzk5c0q1DkndI2IFHIBCHIapEiFHm6JuG0-6C3xL-3I="
-              alt="Illustration of a person signing in"
-              width={500} 
-              height={500} 
-              className="w-full max-w-[280px] h-auto sm:max-w-[320px] md:max-w-[380px] lg:max-w-[450px] object-contain rounded-lg"
-              priority
-              data-ai-hint="man laptop illustration"
-            />
+             <Image
+                src="https://media.istockphoto.com/id/1178763127/vector/man-with-laptop-sitting-on-the-chair-freelance-or-studying-concept-cute-illustration-in-flat.jpg?s=612x612&w=0&k=20&c=gzk5c0q1DkndI2IFHIBCHIapEiFHm6JuG0-6C3xL-3I="
+                alt="Illustration of a person signing in"
+                width={500}
+                height={500}
+                className="w-full max-w-[280px] h-auto sm:max-w-[320px] md:max-w-[380px] lg:max-w-[450px] object-contain rounded-lg block"
+                priority
+                data-ai-hint="man laptop illustration"
+              />
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -37,24 +37,24 @@ import {
   Package,
   ChevronRight,
   BookOpenCheck,
-  BookMarked, 
-  Youtube, 
+  BookMarked,
+  Youtube,
   Link as LinkIcon,
-  Save, // Added Save icon
+  // Save icon removed as profile saving is removed for local auth
 } from 'lucide-react';
 import type {
   ProfileFormData,
-  CareerRecommendation,
-  CareerPathway,
-  EmployabilityScore,
+  CareerRecommendation, // This is CareerRecommendationsOutput from the flow
+  CareerPathway,       // This is SuggestCareerPathwaysOutput from the flow
+  EmployabilityScore,  // This is CalculateEmployabilityScoreOutput from the flow
   GitHubAnalyticsData,
   LeetCodeAnalyticsData,
   CommitHistoryData,
   LeetCodeDifficultyData,
   LeetCodeDailyActivityData,
-  LearningResource, 
-  ResourceType, 
-} from '@/lib/types';
+  LearningResource,
+  ResourceType,
+} from '@/lib/types'; // Ensure CareerRecommendation type matches flow output
 import { generateCareerRecommendations } from '@/ai/flows/generate-career-recommendations';
 import { suggestCareerPathways } from '@/ai/flows/suggest-career-pathways';
 import { calculateEmployabilityScore } from '@/ai/flows/calculate-employability-score';
@@ -70,9 +70,6 @@ import {
 import { Bar, BarChart, Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { auth, db } from '@/lib/firebase'; // Import Firebase auth and db
-import { onAuthStateChanged, User } from 'firebase/auth'; // Import User type
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'; // Firestore functions
 
 const profileFormSchema = z.object({
   academic: z.object({
@@ -194,7 +191,7 @@ export default function CareerPredictorPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  // isSavingProfile state removed as profile saving is removed for local auth
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
   const [recommendations, setRecommendations] = useState<CareerRecommendation | null>(null);
   const [pathways, setPathways] = useState<CareerPathway | null>(null);
@@ -204,66 +201,27 @@ export default function CareerPredictorPage() {
   const [githubUsernameForAnalytics, setGithubUsernameForAnalytics] = useState<string | null>(null);
   const [leetcodeUsernameForAnalytics, setLeetcodeUsernameForAnalytics] = useState<string | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
+  // currentUser state related to Firebase auth removed
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: defaultProfileValues,
   });
 
-  const { control, handleSubmit, reset, formState: { errors, isDirty } } = form;
+  const { control, handleSubmit, reset, formState: { errors } } = form; // isDirty removed
 
-  const fetchProfileData = useCallback(async (user: User) => {
-    if (!user) return;
-    const profileDocRef = doc(db, 'profiles', user.uid);
-    try {
-      const docSnap = await getDoc(profileDocRef);
-      if (docSnap.exists()) {
-        const profileData = docSnap.data() as ProfileFormData;
-        reset(profileData); // Pre-fill form
-        toast({ title: "Profile Loaded", description: "Your saved profile data has been loaded."});
-      } else {
-        reset(defaultProfileValues); // Reset to default if no profile saved
-      }
-    } catch (error) {
-      console.error("Error fetching profile data:", error);
-      toast({ variant: "destructive", title: "Error Loading Profile", description: "Could not load your saved profile."});
-      reset(defaultProfileValues);
-    }
-  }, [reset, toast]);
+  // fetchProfileData and saveProfile logic removed as it was tied to Firebase
+  // currentUser state logic removed
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setCurrentUser(user);
-        fetchProfileData(user); // Fetch profile data once user is confirmed
-        setIsAuthenticating(false);
-      } else {
-        router.push('/signin');
-      }
-    });
-    return () => unsubscribe();
-  }, [router, fetchProfileData]);
-
-  const saveProfile = async (data: ProfileFormData) => {
-    if (!currentUser) {
-      toast({ variant: "destructive", title: "Not Authenticated", description: "You must be signed in to save your profile."});
-      return;
+    // Revert to localStorage check for authentication
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    if (!isAuthenticated) {
+      router.push('/signin');
+    } else {
+      setIsAuthenticating(false);
     }
-    setIsSavingProfile(true);
-    const profileDocRef = doc(db, 'profiles', currentUser.uid);
-    try {
-      await setDoc(profileDocRef, { ...data, lastUpdated: serverTimestamp() }, { merge: true });
-      toast({ title: "Profile Saved!", description: "Your profile data has been saved successfully."});
-      form.reset(data, { keepValues: true, keepDirty: false }); // Reset dirty state
-    } catch (error: any) {
-      console.error("Error saving profile data:", error);
-      toast({ variant: "destructive", title: "Error Saving Profile", description: error.message || "Could not save your profile."});
-    } finally {
-      setIsSavingProfile(false);
-    }
-  };
+  }, [router]);
 
 
   const onGenerateInsights = async (data: ProfileFormData) => {
@@ -277,11 +235,7 @@ export default function CareerPredictorPage() {
     setGithubUsernameForAnalytics(data.coding.githubUsername || null);
     setLeetcodeUsernameForAnalytics(data.coding.codingPlatformUsername || null);
 
-    // Save profile before generating insights if it's dirty
-    if (isDirty) {
-      await saveProfile(data);
-    }
-
+    // Profile saving logic removed
 
     const academicPerformanceSummary = `CGPA: ${data.academic.cgpa}, Major: ${data.academic.major}. Strengths: ${data.academic.academicStrengths}. Weaknesses: ${data.academic.academicWeaknesses}.`;
     const codingSkillsSummary = `Languages & Frameworks: ${data.coding.programmingLanguages}. Notable Projects: ${data.coding.keyProjects}. GitHub: ${data.coding.githubUsername || 'N/A'}. Coding Platform (${data.coding.codingPlatformUsername || 'N/A'}): ${data.coding.codingPlatformStats || 'N/A'}.`;
@@ -300,7 +254,7 @@ export default function CareerPredictorPage() {
         }),
         suggestCareerPathways({
           academicPerformance: academicPerformanceSummary,
-          codingStats: problemSolvingSkillsSummary,
+          codingStats: problemSolvingSkillsSummary, // Ensure this maps correctly
           extracurricularActivities: extracurricularActivitiesSummary,
           skills: data.skills,
         }),
@@ -338,7 +292,7 @@ export default function CareerPredictorPage() {
       console.error("Error Message:", error?.message);
       console.error("Error Stack:", error?.stack);
       console.error("Full Error Object (Client):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-      
+
       let description = "An error occurred while processing your request. Please try again. Check server logs for details.";
       if (error instanceof Error) {
         description = `Failed: ${error.message}. IMPORTANT: Check server console (terminal running 'npm run dev') for more detailed logs and potential causes like API key issues or AI model errors.`;
@@ -380,7 +334,7 @@ export default function CareerPredictorPage() {
       </div>
     );
   }
-  
+
   const scoreStyling = employabilityScore ? getScoreColorAndLabel(employabilityScore.score) : null;
 
   return (
@@ -393,7 +347,7 @@ export default function CareerPredictorPage() {
       <div>
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">Career Predictor & AI Insights</h2>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Fill in your details to get AI-powered insights and career suggestions. Your profile will be saved.
+          Fill in your details to get AI-powered insights and career suggestions.
         </p>
       </div>
 
@@ -454,21 +408,8 @@ export default function CareerPredictorPage() {
             </Card>
 
             <div className="flex flex-col gap-3 sm:gap-4">
-              <Button 
-                type="button" 
-                onClick={handleSubmit(saveProfile)} 
-                disabled={isSavingProfile || !isDirty} 
-                variant="outline"
-                className="w-full text-sm sm:text-base py-3 sm:py-4 md:py-6"
-              >
-                {isSavingProfile ? (
-                  <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                ) : (
-                  <Save className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                )}
-                Save Profile Data
-              </Button>
-              <Button type="submit" disabled={isLoading || isLoadingAnalytics || isSavingProfile} className="w-full text-sm sm:text-base py-3 sm:py-4 md:py-6">
+              {/* Save Profile Button Removed */}
+              <Button type="submit" disabled={isLoading || isLoadingAnalytics} className="w-full text-sm sm:text-base py-3 sm:py-4 md:py-6">
                 {(isLoading || isLoadingAnalytics) ? (
                   <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                 ) : (
@@ -485,7 +426,7 @@ export default function CareerPredictorPage() {
                 setLeetCodeData(null);
                 setGithubUsernameForAnalytics(null);
                 setLeetcodeUsernameForAnalytics(null);
-                }} disabled={isLoading || isLoadingAnalytics || isSavingProfile} className="w-full text-sm sm:text-base py-3 sm:py-4 md:py-6">
+                }} disabled={isLoading || isLoadingAnalytics} className="w-full text-sm sm:text-base py-3 sm:py-4 md:py-6">
                 <RotateCcw className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Reset Form
               </Button>
@@ -703,7 +644,7 @@ interface FormFieldProps {
   placeholder?: string;
   error?: any;
   icon?: React.ReactNode;
-  control: any; 
+  control: any;
 }
 
 function FormField({ name, label, placeholder, error, icon, control }: FormFieldProps) {

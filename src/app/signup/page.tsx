@@ -23,8 +23,6 @@ import { Loader2, UserPlus, Mail, KeyRound, UserCircle2, BrainCircuit } from 'lu
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { signUpUser } from '@/actions/auth';
-import { auth } from '@/lib/firebase'; // Import Firebase auth
-import { onAuthStateChanged } from 'firebase/auth';
 
 const signUpFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -33,7 +31,7 @@ const signUpFormSchema = z.object({
   confirmPassword: z.string().min(1, "Please confirm your password"),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
-  path: ["confirmPassword"], 
+  path: ["confirmPassword"],
 });
 
 type SignUpFormData = z.infer<typeof signUpFormSchema>;
@@ -45,14 +43,13 @@ export default function SignUpPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.push('/dashboard/student'); // Redirect if already logged in
-      } else {
-        setIsCheckingAuth(false);
-      }
-    });
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    // Check if user is already authenticated via localStorage
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    if (isAuthenticated === 'true') {
+      router.push('/dashboard/student');
+    } else {
+      setIsCheckingAuth(false);
+    }
   }, [router]);
 
   const form = useForm<SignUpFormData>({
@@ -69,7 +66,7 @@ export default function SignUpPage() {
 
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true);
-    
+
     const formData = new FormData();
     formData.append('name', data.name);
     formData.append('email', data.email);
@@ -82,7 +79,7 @@ export default function SignUpPage() {
         title: "Account Created!",
         description: result.message || "You can now sign in with your new account.",
       });
-      router.push('/signin'); // Redirect to sign-in page after successful signup
+      router.push('/signin');
     } else {
       toast({
         variant: "destructive",
@@ -117,8 +114,8 @@ export default function SignUpPage() {
                 <CardDescription className="text-sm sm:text-base">Join CareerInsight to unlock your potential.</CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4"> 
-                  
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+
                   <div className="space-y-1 sm:space-y-1.5">
                     <Label htmlFor="name" className={cn("text-sm", errors.name ? 'text-destructive' : '')}>Full Name</Label>
                     <div className="relative">
@@ -202,7 +199,7 @@ export default function SignUpPage() {
                     {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
                   </div>
 
-                  <Button type="submit" disabled={isLoading} className="w-full text-base sm:text-lg py-3 sm:py-6 mt-2"> 
+                  <Button type="submit" disabled={isLoading} className="w-full text-base sm:text-lg py-3 sm:py-6 mt-2">
                     {isLoading ? (
                       <Loader2 className="mr-2 h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                     ) : (
@@ -227,9 +224,9 @@ export default function SignUpPage() {
             <Image
               src="https://img.freepik.com/premium-vector/woman-with-laptop-showing_126609-931.jpg?w=740"
               alt="Illustration of a person signing up"
-              width={500} 
-              height={500} 
-              className="w-full max-w-[280px] h-auto sm:max-w-[320px] md:max-w-[380px] lg:max-w-[450px] object-contain rounded-lg"
+              width={500}
+              height={500}
+              className="w-full max-w-[280px] h-auto sm:max-w-[320px] md:max-w-[380px] lg:max-w-[450px] object-contain rounded-lg block"
               priority
               data-ai-hint="woman laptop illustration"
             />

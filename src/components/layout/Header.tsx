@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { BrainCircuit, LogIn, UserPlus, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation'; // Added usePathname
+import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -16,24 +16,30 @@ import {
   SheetClose
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { auth } from '@/lib/firebase'; // Import Firebase auth
-import { onAuthStateChanged, signOut as firebaseSignOut, User } from 'firebase/auth'; // Import User type
+
+interface UserData {
+  name: string | null;
+}
 
 export function Header() {
   const router = useRouter();
-  const pathname = usePathname(); // Get current path
+  const pathname = usePathname();
   const { toast } = useToast();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return () => unsubscribe(); // Cleanup subscription on unmount
-  }, []);
+    // Check localStorage for authentication state
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    const userName = localStorage.getItem('userName');
+    if (isAuthenticated) {
+      setCurrentUser({ name: userName });
+    } else {
+      setCurrentUser(null);
+    }
+  }, [pathname]); // Re-check on route change for SPA-like updates
 
   useEffect(() => {
     // Close mobile menu on route change
@@ -41,24 +47,17 @@ export function Header() {
   }, [pathname]);
 
 
-  const handleSignOut = async () => {
-    try {
-      await firebaseSignOut(auth);
-      setCurrentUser(null); // Update state immediately
-      toast({
-        title: "Signed Out",
-        description: "You have been successfully signed out.",
-      });
-      router.push('/'); // Redirect to home after sign out
-    } catch (error) {
-      console.error("Sign out error", error);
-      toast({
-        variant: "destructive",
-        title: "Sign Out Failed",
-        description: "An error occurred while signing out.",
-      });
-    }
-    setIsMobileMenuOpen(false);
+  const handleSignOut = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userEmail');
+    setCurrentUser(null);
+    toast({
+      title: "Signed Out",
+      description: "You have been successfully signed out.",
+    });
+    router.push('/');
+    setIsMobileMenuOpen(false); // Ensure menu closes
   };
 
   const NavLink = ({ href, children, onClick }: { href: string; children: React.ReactNode, onClick?: () => void }) => (

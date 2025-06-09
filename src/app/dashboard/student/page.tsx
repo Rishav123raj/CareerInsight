@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Loader2, 
-  Sparkles, 
-  ArrowRight, 
+import {
+  Loader2,
+  Sparkles,
+  ArrowRight,
   UserCircle,
   UserCheck,
   Edit3,
@@ -18,24 +18,26 @@ import {
   Briefcase,
   Lightbulb
 } from 'lucide-react';
-import { auth } from '@/lib/firebase'; // Import Firebase auth
-import { onAuthStateChanged, User } from 'firebase/auth'; // Import User type
+
+interface UserData {
+  displayName: string | null;
+}
 
 export default function StudentDashboardPage() {
   const router = useRouter();
   const [isAuthenticating, setIsAuthenticating] = useState(true);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setCurrentUser(user);
-        setIsAuthenticating(false);
-      } else {
-        router.push('/signin');
-      }
-    });
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    const userName = localStorage.getItem('userName');
+
+    if (isAuthenticated) {
+      setCurrentUser({ displayName: userName });
+      setIsAuthenticating(false);
+    } else {
+      router.push('/signin');
+    }
   }, [router]);
 
   if (isAuthenticating) {
@@ -47,7 +49,7 @@ export default function StudentDashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10 sm:space-y-16"> 
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10 sm:space-y-16">
       <div className="flex flex-col items-center text-center space-y-6 sm:space-y-8">
         <UserCircle className="h-20 w-20 sm:h-24 sm:w-24 text-primary" />
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
@@ -97,7 +99,7 @@ export default function StudentDashboardPage() {
               </p>
               <Button variant="outline" className="w-full group text-sm" asChild>
                 <Link href="/dashboard/career-predictor">
-                  <Edit3 className="mr-2 h-4 w-4 group-hover:animate-pulse" /> 
+                  <Edit3 className="mr-2 h-4 w-4 group-hover:animate-pulse" />
                   Update Profile & Get Insights
                 </Link>
               </Button>
@@ -119,12 +121,12 @@ export default function StudentDashboardPage() {
                 </Link>
               </Button>
               <Button variant="ghost" className="w-full justify-start p-2 sm:p-3 text-sm hover:bg-secondary group" asChild>
-                <Link href="#"> 
+                <Link href="#">
                   <BookOpen className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-primary group-hover:text-accent transition-colors" />
                   Explore Learning Resources
                 </Link>
               </Button>
-              <Button variant="ghost" className="w-full justify-start p-2 sm:p-3 text-sm hover:bg-secondary group" disabled> 
+              <Button variant="ghost" className="w-full justify-start p-2 sm:p-3 text-sm hover:bg-secondary group" disabled>
                 <Link href="#">
                   <Briefcase className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-accent transition-colors" />
                   Browse Job Openings (Soon)

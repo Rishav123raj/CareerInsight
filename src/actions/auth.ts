@@ -1,29 +1,48 @@
 
 'use server';
 
-import { auth, db } from '@/lib/firebase';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  updateProfile as updateFirebaseProfile // Renamed to avoid conflict
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import fs from 'fs/promises';
+import path from 'path';
+import bcrypt from 'bcryptjs'; // Using bcryptjs as it was in previous local setup
+
+// Define the path to the users.json file
+const usersFilePath = path.resolve(process.cwd(), 'src', 'data', 'users.json');
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  password?: string; // Hashed password
+  createdAt?: Date; // Optional: if you want to keep track of creation time
+}
 
 interface AuthResponse {
   success: boolean;
   message: string;
-  user?: { 
-    id: string; 
-    name: string | null; // Firebase displayName can be null
-    email: string | null; // Firebase email can be null
-  };
+  user?: { id: string; name: string; email: string }; // Return non-sensitive user info
   error?: { code?: string; message: string };
 }
 
-interface UserProfile {
-  name: string;
-  email: string;
-  createdAt: Date;
+// Helper function to read users from the JSON file
+async function getUsers(): Promise<User[]> {
+  try {
+    await fs.mkdir(path.dirname(usersFilePath), { recursive: true }); // Ensure directory exists
+    const data = await fs.readFile(usersFilePath, 'utf-8');
+    return JSON.parse(data) as User[];
+  } catch (error) {
+    // If file doesn't exist or is empty, or other read errors, return empty array
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return []; // File not found, normal for first run
+    }
+    console.warn("Warning: Could not read users.json, starting with empty user list. Error:", (error as Error).message);
+    return [];
+  }
+}
+
+// Helper function to save users to the JSON file
+async function saveUsers(users: User[]): Promise<void> {
+  await fs.mkdir(path.dirname(usersFilePath), { recursive: true }); // Ensure directory exists
+  await fs.writeFile(usersFilePath, JSON.stringify(users, null, 2), 'utf-8');
 }
 
 export async function signUpUser(formData: FormData): Promise<AuthResponse> {
@@ -39,41 +58,34 @@ export async function signUpUser(formData: FormData): Promise<AuthResponse> {
   }
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const firebaseUser = userCredential.user;
+    const users = await getUsers();
+    const existingUser = users.find(user => user.email === email);
+    if (existingUser) {
+      return { success: false, message: 'This email is already registered.', error: { code: 'auth/email-already-in-use' } };
+    }
 
-    // Update Firebase Auth profile with display name
-    await updateFirebaseProfile(firebaseUser, { displayName: name });
-
-    // Store additional user information in Firestore
-    const userRef = doc(db, 'users', firebaseUser.uid);
-    await setDoc(userRef, {
-      name: name,
-      email: firebaseUser.email,
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser: User = {
+      id: crypto.randomUUID(), // Modern Node.js for UUID
+      name,
+      email,
+      password: hashedPassword,
       createdAt: new Date(),
-    });
+    };
 
+    users.push(newUser);
+    await saveUsers(users);
+
+    // Do not return password or sensitive data
+    const { password: _p, ...userToReturn } = newUser;
     return {
       success: true,
       message: 'User registered successfully!',
-      user: { 
-        id: firebaseUser.uid, 
-        name: firebaseUser.displayName, 
-        email: firebaseUser.email 
-      },
+      user: userToReturn,
     };
   } catch (error: any) {
-    console.error('🔴 Firebase Sign Up Error:', error);
-    // Firebase errors often have a 'code' property, e.g., 'auth/email-already-in-use'
-    let message = 'An unexpected error occurred during sign up.';
-    if (error.code === 'auth/email-already-in-use') {
-      message = 'This email is already registered. Please sign in or use a different email.';
-    } else if (error.code === 'auth/weak-password') {
-      message = 'The password is too weak. Please choose a stronger password.';
-    } else if (error.message) {
-      message = error.message;
-    }
-    return { success: false, message: message, error: { code: error.code, message: error.message } };
+    console.error('🔴 Sign Up Error (Local JSON):', error);
+    return { success: false, message: error.message || 'An unexpected error occurred during sign up.', error: { message: error.message } };
   }
 }
 
@@ -86,32 +98,27 @@ export async function signInUser(formData: FormData): Promise<AuthResponse> {
   }
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const firebaseUser = userCredential.user;
+    const users = await getUsers();
+    const user = users.find(u => u.email === email);
 
-    // Optionally, you could fetch additional user data from Firestore here if needed
-    // For now, Firebase Auth's user object is usually sufficient for basic info.
-    // const userDocRef = doc(db, "users", firebaseUser.uid);
-    // const userDoc = await getDoc(userDocRef);
-    // const userName = userDoc.exists() ? userDoc.data().name : firebaseUser.displayName;
+    if (!user || !user.password) {
+      return { success: false, message: 'Invalid email or password.', error: { code: 'auth/invalid-credential' } };
+    }
 
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return { success: false, message: 'Invalid email or password.', error: { code: 'auth/invalid-credential' } };
+    }
+
+    // Do not return password or sensitive data
+    const { password: _p, ...userToReturn } = user;
     return {
       success: true,
       message: 'Signed in successfully!',
-      user: { 
-        id: firebaseUser.uid, 
-        name: firebaseUser.displayName, // Or fetched name from Firestore
-        email: firebaseUser.email 
-      },
+      user: userToReturn,
     };
   } catch (error: any) {
-    console.error('🔴 Firebase Sign In Error:', error);
-    let message = 'An unexpected error occurred during sign in.';
-    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-      message = 'Invalid email or password.';
-    } else if (error.message) {
-      message = error.message;
-    }
-    return { success: false, message: message, error: { code: error.code, message: error.message } };
+    console.error('🔴 Sign In Error (Local JSON):', error);
+    return { success: false, message: error.message || 'An unexpected error occurred during sign in.', error: { message: error.message } };
   }
 }
