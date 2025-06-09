@@ -29,7 +29,7 @@ export type CareerRecommendationsInput = z.infer<typeof CareerRecommendationsInp
 const LearningResourceSchema = z.object({
   type: z.enum(["course", "book/pdf", "youtube_video/channel"]).describe("The type of resource."),
   title: z.string().describe("The title or name of the resource (e.g., course name, book title, video/channel name)."),
-  url: z.string().url().optional().describe("A valid URL to the resource. For books/PDFs, this may not always be a direct link but a source. For YouTube, link to the video or channel. Ensure URLs are functional and directly relevant."),
+  url: z.string().optional().describe("A URL to the resource. Ensure URLs are functional and directly relevant. For books/PDFs, this may not always be a direct link but a source. For YouTube, link to the video or channel."),
   description: z.string().optional().describe("A brief description, or a hint on where to find it (e.g., 'Official documentation', 'Search on Project Gutenberg', 'Available on university open courseware'). This is especially useful if a direct URL is not specific or for broader book suggestions.")
 });
 
@@ -105,8 +105,8 @@ const generateCareerRecommendationsFlow = ai.defineFlow(
         console.error("Input that caused no output:", JSON.stringify(input, null, 2));
         throw new Error("AI failed to generate career recommendations. No output received from model. Check server logs.");
     }
-    // Ensure URLs in resources are valid if present, or handle if LLM misses one.
-    // Zod schema validation handles URL format.
+    // Zod schema validation will still parse the 'url' as a string.
+    // If strict URL format validation is needed *after* AI response, it could be done here manually.
     return output;
   }
 );
