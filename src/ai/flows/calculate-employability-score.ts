@@ -93,8 +93,9 @@ const calculateEmployabilityScoreFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     if (!output) {
-        console.error("calculateEmployabilityScoreFlow: AI did not return an output for the given input:", input);
-        throw new Error("AI failed to process employability score. No output received from model.");
+        console.error("🔴 calculateEmployabilityScoreFlow: AI did not return an output.");
+        console.error("Input that caused no output:", JSON.stringify(input, null, 2));
+        throw new Error("AI failed to process employability score. No output received from model. Check server logs.");
     }
     // Ensure score is within bounds, LLMs can sometimes deviate slightly.
     // Zod schema validation should ensure output.score is a number.
@@ -102,3 +103,4 @@ const calculateEmployabilityScoreFlow = ai.defineFlow(
     return output;
   }
 );
+

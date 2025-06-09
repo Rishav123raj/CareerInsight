@@ -37,9 +37,9 @@ import {
   Package,
   ChevronRight,
   BookOpenCheck,
-  BookMarked, // Added for books
-  Youtube, // Added for YouTube
-  Link as LinkIcon, // Generic link icon
+  BookMarked, 
+  Youtube, 
+  Link as LinkIcon, 
 } from 'lucide-react';
 import type {
   ProfileFormData,
@@ -51,8 +51,8 @@ import type {
   CommitHistoryData,
   LeetCodeDifficultyData,
   LeetCodeDailyActivityData,
-  LearningResource, // Import the new type
-  ResourceType, // Import ResourceType
+  LearningResource, 
+  ResourceType, 
 } from '@/lib/types';
 import { generateCareerRecommendations } from '@/ai/flows/generate-career-recommendations';
 import { suggestCareerPathways } from '@/ai/flows/suggest-career-pathways';
@@ -287,11 +287,11 @@ export default function CareerPredictorPage() {
       
       let description = "An error occurred while processing your request. Please try again. Check server logs for details.";
       if (error instanceof Error) {
-        description = `Failed: ${error.message}. Check server console (terminal) for more details and potential causes like API key issues.`;
+        description = `Failed: ${error.message}. IMPORTANT: Check server console (terminal running 'npm run dev') for more detailed logs and potential causes like API key issues or AI model errors.`;
       } else if (typeof error === 'string') {
         description = error;
       } else if (error && typeof error === 'object' && 'message' in error) {
-        description = `Failed: ${String(error.message)}. Check server console (terminal) for more details.`;
+        description = `Failed: ${String(error.message)}. IMPORTANT: Check server console (terminal running 'npm run dev') for more detailed logs.`;
       }
 
       toast({

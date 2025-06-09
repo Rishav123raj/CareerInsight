@@ -101,11 +101,13 @@ const generateCareerRecommendationsFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     if (!output) {
-        console.error("generateCareerRecommendationsFlow: AI did not return an output for the given input:", input);
-        throw new Error("AI failed to generate career recommendations. No output received from model.");
+        console.error("🔴 generateCareerRecommendationsFlow: AI did not return an output.");
+        console.error("Input that caused no output:", JSON.stringify(input, null, 2));
+        throw new Error("AI failed to generate career recommendations. No output received from model. Check server logs.");
     }
     // Ensure URLs in resources are valid if present, or handle if LLM misses one.
     // Zod schema validation handles URL format.
     return output;
   }
 );
+
