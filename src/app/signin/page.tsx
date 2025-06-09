@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
@@ -22,6 +22,8 @@ import { Loader2, LogIn, Mail, KeyRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { signInUser } from '@/actions/auth'; 
+import { auth } from '@/lib/firebase'; // Import Firebase auth
+import { onAuthStateChanged } from 'firebase/auth';
 
 const signInFormSchema = z.object({
   email: z.string().email("Invalid email address").min(1, "Email is required"),
@@ -34,6 +36,18 @@ export default function SignInPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push('/dashboard/student'); // Redirect if already logged in
+      } else {
+        setIsCheckingAuth(false);
+      }
+    });
+    return () => unsubscribe(); // Cleanup subscription on unmount
+  }, [router]);
 
   const form = useForm<SignInFormData>({
     resolver: zodResolver(signInFormSchema),
@@ -52,17 +66,17 @@ export default function SignInPage() {
     formData.append('email', data.email);
     formData.append('password', data.password);
 
+    // The signInUser action now uses Firebase and doesn't directly manage client session
+    // Firebase onAuthStateChanged will handle the redirect after successful Firebase sign-in
     const result = await signInUser(formData);
 
-    if (result.success && result.user) {
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userName', result.user.name); 
-      
+    if (result.success) {
       toast({
         title: "Signed In Successfully!",
-        description: result.message || "Welcome back! Redirecting you to your dashboard...",
+        description: result.message || "Welcome back! Redirecting you...",
       });
-      router.push('/dashboard/student'); 
+      // Redirection is now handled by onAuthStateChanged effect
+      // router.push('/dashboard/student'); 
     } else {
       toast({
         variant: "destructive",
@@ -72,6 +86,14 @@ export default function SignInPage() {
       setIsLoading(false);
     }
   };
+  
+  if (isCheckingAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.16))]">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.16))] bg-muted/40 py-8 px-4 sm:px-6 lg:px-8">
@@ -102,7 +124,7 @@ export default function SignInPage() {
                             type="email"
                             placeholder="you@example.com"
                             {...field}
-                            className={cn("pl-10 text-sm sm:text-base", errors.email ? 'border-destructive' : '')}
+                            className={cn("pl-10 text-base sm:text-sm", errors.email ? 'border-destructive' : '')}
                           />
                         )}
                       />
@@ -123,7 +145,7 @@ export default function SignInPage() {
                             type="password"
                             placeholder="••••••••"
                             {...field}
-                            className={cn("pl-10 text-sm sm:text-base", errors.password ? 'border-destructive' : '')}
+                            className={cn("pl-10 text-base sm:text-sm", errors.password ? 'border-destructive' : '')}
                           />
                         )}
                       />
@@ -150,7 +172,7 @@ export default function SignInPage() {
           </div>
 
           {/* Image Section */}
-          <div className="flex order-first lg:order-last items-center justify-center bg-gradient-to-br from-primary/5 via-accent/5 to-background p-6 sm:p-8 md:p-12 relative">
+          <div className="hidden lg:flex order-first lg:order-last items-center justify-center bg-gradient-to-br from-primary/5 via-accent/5 to-background p-6 sm:p-8 md:p-12 relative">
             <Image
               src="https://media.istockphoto.com/id/1178763127/vector/man-with-laptop-sitting-on-the-chair-freelance-or-studying-concept-cute-illustration-in-flat.jpg?s=612x612&w=0&k=20&c=gzk5c0q1DkndI2IFHIBCHIapEiFHm6JuG0-6C3xL-3I="
               alt="Illustration of a person signing in"

@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -39,7 +39,8 @@ import {
   BookOpenCheck,
   BookMarked, 
   Youtube, 
-  Link as LinkIcon, 
+  Link as LinkIcon,
+  Save, // Added Save icon
 } from 'lucide-react';
 import type {
   ProfileFormData,
@@ -69,7 +70,9 @@ import {
 import { Bar, BarChart, Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
+import { auth, db } from '@/lib/firebase'; // Import Firebase auth and db
+import { onAuthStateChanged, User } from 'firebase/auth'; // Import User type
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'; // Firestore functions
 
 const profileFormSchema = z.object({
   academic: z.object({
@@ -191,6 +194,7 @@ export default function CareerPredictorPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
   const [recommendations, setRecommendations] = useState<CareerRecommendation | null>(null);
   const [pathways, setPathways] = useState<CareerPathway | null>(null);
@@ -200,25 +204,69 @@ export default function CareerPredictorPage() {
   const [githubUsernameForAnalytics, setGithubUsernameForAnalytics] = useState<string | null>(null);
   const [leetcodeUsernameForAnalytics, setLeetcodeUsernameForAnalytics] = useState<string | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    if (isAuthenticated !== 'true') {
-      router.push('/signin');
-    } else {
-      setIsAuthenticating(false);
-    }
-  }, [router]);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: defaultProfileValues,
   });
 
-  const { control, handleSubmit, reset, formState: { errors } } = form;
+  const { control, handleSubmit, reset, formState: { errors, isDirty } } = form;
 
-  const onSubmit = async (data: ProfileFormData) => {
+  const fetchProfileData = useCallback(async (user: User) => {
+    if (!user) return;
+    const profileDocRef = doc(db, 'profiles', user.uid);
+    try {
+      const docSnap = await getDoc(profileDocRef);
+      if (docSnap.exists()) {
+        const profileData = docSnap.data() as ProfileFormData;
+        reset(profileData); // Pre-fill form
+        toast({ title: "Profile Loaded", description: "Your saved profile data has been loaded."});
+      } else {
+        reset(defaultProfileValues); // Reset to default if no profile saved
+      }
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
+      toast({ variant: "destructive", title: "Error Loading Profile", description: "Could not load your saved profile."});
+      reset(defaultProfileValues);
+    }
+  }, [reset, toast]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        fetchProfileData(user); // Fetch profile data once user is confirmed
+        setIsAuthenticating(false);
+      } else {
+        router.push('/signin');
+      }
+    });
+    return () => unsubscribe();
+  }, [router, fetchProfileData]);
+
+  const saveProfile = async (data: ProfileFormData) => {
+    if (!currentUser) {
+      toast({ variant: "destructive", title: "Not Authenticated", description: "You must be signed in to save your profile."});
+      return;
+    }
+    setIsSavingProfile(true);
+    const profileDocRef = doc(db, 'profiles', currentUser.uid);
+    try {
+      await setDoc(profileDocRef, { ...data, lastUpdated: serverTimestamp() }, { merge: true });
+      toast({ title: "Profile Saved!", description: "Your profile data has been saved successfully."});
+      form.reset(data, { keepValues: true, keepDirty: false }); // Reset dirty state
+    } catch (error: any) {
+      console.error("Error saving profile data:", error);
+      toast({ variant: "destructive", title: "Error Saving Profile", description: error.message || "Could not save your profile."});
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+
+  const onGenerateInsights = async (data: ProfileFormData) => {
     setIsLoading(true);
     setIsLoadingAnalytics(true);
     setRecommendations(null);
@@ -228,6 +276,12 @@ export default function CareerPredictorPage() {
     setLeetCodeData(null);
     setGithubUsernameForAnalytics(data.coding.githubUsername || null);
     setLeetcodeUsernameForAnalytics(data.coding.codingPlatformUsername || null);
+
+    // Save profile before generating insights if it's dirty
+    if (isDirty) {
+      await saveProfile(data);
+    }
+
 
     const academicPerformanceSummary = `CGPA: ${data.academic.cgpa}, Major: ${data.academic.major}. Strengths: ${data.academic.academicStrengths}. Weaknesses: ${data.academic.academicWeaknesses}.`;
     const codingSkillsSummary = `Languages & Frameworks: ${data.coding.programmingLanguages}. Notable Projects: ${data.coding.keyProjects}. GitHub: ${data.coding.githubUsername || 'N/A'}. Coding Platform (${data.coding.codingPlatformUsername || 'N/A'}): ${data.coding.codingPlatformStats || 'N/A'}.`;
@@ -339,11 +393,11 @@ export default function CareerPredictorPage() {
       <div>
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">Career Predictor & AI Insights</h2>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Fill in your details to get AI-powered insights and career suggestions.
+          Fill in your details to get AI-powered insights and career suggestions. Your profile will be saved.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
+      <form onSubmit={handleSubmit(onGenerateInsights)} className="space-y-6 sm:space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           <div className="space-y-6 sm:space-y-8">
             <Card className="shadow-lg">
@@ -399,8 +453,22 @@ export default function CareerPredictorPage() {
               </CardContent>
             </Card>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Button type="submit" disabled={isLoading || isLoadingAnalytics} className="w-full sm:w-auto flex-grow text-sm sm:text-base py-3 sm:py-4 md:py-6">
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <Button 
+                type="button" 
+                onClick={handleSubmit(saveProfile)} 
+                disabled={isSavingProfile || !isDirty} 
+                variant="outline"
+                className="w-full text-sm sm:text-base py-3 sm:py-4 md:py-6"
+              >
+                {isSavingProfile ? (
+                  <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                )}
+                Save Profile Data
+              </Button>
+              <Button type="submit" disabled={isLoading || isLoadingAnalytics || isSavingProfile} className="w-full text-sm sm:text-base py-3 sm:py-4 md:py-6">
                 {(isLoading || isLoadingAnalytics) ? (
                   <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                 ) : (
@@ -417,7 +485,7 @@ export default function CareerPredictorPage() {
                 setLeetCodeData(null);
                 setGithubUsernameForAnalytics(null);
                 setLeetcodeUsernameForAnalytics(null);
-                }} disabled={isLoading || isLoadingAnalytics} className="w-full sm:w-auto text-sm sm:text-base py-3 sm:py-4 md:py-6">
+                }} disabled={isLoading || isLoadingAnalytics || isSavingProfile} className="w-full text-sm sm:text-base py-3 sm:py-4 md:py-6">
                 <RotateCcw className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Reset Form
               </Button>
@@ -498,7 +566,7 @@ export default function CareerPredictorPage() {
                 ))}
                 <h3 className="font-semibold text-base sm:text-lg mt-4 sm:mt-6 mb-2">Suggested Roles to Explore:</h3>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                  {recommendations.suggestedRoles.map((role, index) => (
+                  {(recommendations.suggestedRoles || []).map((role, index) => (
                     <span key={index} className="px-2.5 py-1 text-xs rounded-full bg-accent text-accent-foreground">{role}</span>
                   ))}
                 </div>
@@ -648,7 +716,7 @@ function FormField({ name, label, placeholder, error, icon, control }: FormField
       <Controller
         name={name}
         control={control}
-        render={({ field }) => <Input id={name} placeholder={placeholder} {...field} className={cn("text-sm sm:text-base", error ? 'border-destructive' : '')} />}
+        render={({ field }) => <Input id={name} placeholder={placeholder} {...field} className={cn("text-base sm:text-sm", error ? 'border-destructive' : '')} />}
       />
       {error && <p className="text-xs text-destructive">{error.message}</p>}
     </div>
@@ -664,13 +732,12 @@ function FormTextareaField({ name, label, placeholder, error, control }: FormTex
       <Controller
         name={name}
         control={control}
-        render={({ field }) => <Textarea id={name} placeholder={placeholder} {...field} className={cn("min-h-[70px] sm:min-h-[80px] text-sm sm:text-base", error ? 'border-destructive' : '')} />}
+        render={({ field }) => <Textarea id={name} placeholder={placeholder} {...field} className={cn("min-h-[70px] sm:min-h-[80px] text-base sm:text-sm", error ? 'border-destructive' : '')} />}
       />
       {error && <p className="text-xs text-destructive">{error.message}</p>}
     </div>
   );
 }
-
 
 interface CustomProgressProps extends React.ComponentPropsWithoutRef<typeof Progress> {
   indicatorClassName?: string;
@@ -686,4 +753,3 @@ const CustomProgress = React.forwardRef<
   );
 });
 CustomProgress.displayName = "CustomProgress";
-

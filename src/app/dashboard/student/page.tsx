@@ -18,23 +18,24 @@ import {
   Briefcase,
   Lightbulb
 } from 'lucide-react';
+import { auth } from '@/lib/firebase'; // Import Firebase auth
+import { onAuthStateChanged, User } from 'firebase/auth'; // Import User type
 
 export default function StudentDashboardPage() {
   const router = useRouter();
   const [isAuthenticating, setIsAuthenticating] = useState(true);
-  const [userName, setUserName] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    if (isAuthenticated !== 'true') {
-      router.push('/signin');
-    } else {
-      const storedName = localStorage.getItem('userName');
-      if (storedName) {
-        setUserName(storedName);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        setIsAuthenticating(false);
+      } else {
+        router.push('/signin');
       }
-      setIsAuthenticating(false);
-    }
+    });
+    return () => unsubscribe(); // Cleanup subscription on unmount
   }, [router]);
 
   if (isAuthenticating) {
@@ -47,11 +48,10 @@ export default function StudentDashboardPage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10 sm:space-y-16"> 
-      {/* Existing Welcome Section */}
       <div className="flex flex-col items-center text-center space-y-6 sm:space-y-8">
         <UserCircle className="h-20 w-20 sm:h-24 sm:w-24 text-primary" />
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-          Welcome to Your Dashboard{userName ? `, ${userName}` : ''}!
+          Welcome to Your Dashboard{currentUser?.displayName ? `, ${currentUser.displayName}` : ''}!
         </h1>
         <p className="max-w-xl sm:max-w-2xl text-base sm:text-lg text-muted-foreground">
           This is your personal space to manage your profile and gain insights into your career potential.
@@ -79,13 +79,11 @@ export default function StudentDashboardPage() {
         </Card>
       </div>
 
-      {/* New Engaging Content Section */}
       <div>
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-center mb-8 sm:mb-10 text-foreground">
           Explore & Enhance Your Journey
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Profile Status Card */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
               <CardTitle className="flex items-center text-lg sm:text-xl gap-2">
@@ -106,7 +104,6 @@ export default function StudentDashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Quick Links Card */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
               <CardTitle className="flex items-center text-lg sm:text-xl gap-2">
@@ -136,7 +133,6 @@ export default function StudentDashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Food for Thought Card */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
               <CardTitle className="flex items-center text-lg sm:text-xl gap-2">

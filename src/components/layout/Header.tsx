@@ -4,65 +4,61 @@
 import { useState, useEffect } from 'react';
 import { BrainCircuit, LogIn, UserPlus, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation'; // Added usePathname
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import {
   Sheet,
   SheetContent,
-  SheetHeader, // Added
-  SheetTitle,   // Added
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
   SheetClose
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { auth } from '@/lib/firebase'; // Import Firebase auth
+import { onAuthStateChanged, signOut as firebaseSignOut, User } from 'firebase/auth'; // Import User type
 
 export function Header() {
   const router = useRouter();
+  const pathname = usePathname(); // Get current path
   const { toast } = useToast();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    const authStatus = localStorage.getItem('isAuthenticated') === 'true';
-    setIsAuthenticated(authStatus);
-
-    const handleResize = () => {
-      if (window.innerWidth >= 768) { // md breakpoint
-        setIsMobileMenuOpen(false);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribe(); // Cleanup subscription on unmount
   }, []);
 
   useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'isAuthenticated') {
-        const authStatus = localStorage.getItem('isAuthenticated') === 'true';
-        setIsAuthenticated(authStatus);
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
-
-  const handleSignOut = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userName');
-    setIsAuthenticated(false);
-    toast({
-      title: "Signed Out",
-      description: "You have been successfully signed out.",
-    });
+    // Close mobile menu on route change
     setIsMobileMenuOpen(false);
-    router.push('/');
+  }, [pathname]);
+
+
+  const handleSignOut = async () => {
+    try {
+      await firebaseSignOut(auth);
+      setCurrentUser(null); // Update state immediately
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      });
+      router.push('/'); // Redirect to home after sign out
+    } catch (error) {
+      console.error("Sign out error", error);
+      toast({
+        variant: "destructive",
+        title: "Sign Out Failed",
+        description: "An error occurred while signing out.",
+      });
+    }
+    setIsMobileMenuOpen(false);
   };
 
   const NavLink = ({ href, children, onClick }: { href: string; children: React.ReactNode, onClick?: () => void }) => (
@@ -124,7 +120,7 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1 sm:gap-2">
-          {isAuthenticated ? (
+          {currentUser ? (
             <>
               <NavLink href="/dashboard/student">
                 <LayoutDashboard className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Dashboard
@@ -160,11 +156,11 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] bg-primary text-primary-foreground p-0 flex flex-col">
               <SheetHeader className="flex flex-row items-center justify-between p-4 border-b border-primary/50">
-                <SheetTitle asChild>
-                  <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 hover:opacity-90 transition-opacity text-primary-foreground">
-                      <BrainCircuit size={24} />
-                      <span className="text-lg font-semibold tracking-tight">CareerInsight</span>
-                  </Link>
+                 <SheetTitle asChild>
+                    <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 hover:opacity-90 transition-opacity text-primary-foreground">
+                        <BrainCircuit size={24} />
+                        <span className="text-lg font-semibold tracking-tight">CareerInsight</span>
+                    </Link>
                 </SheetTitle>
                 <SheetClose asChild>
                     <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80">
@@ -174,7 +170,7 @@ export function Header() {
                 </SheetClose>
               </SheetHeader>
               <nav className="flex flex-col gap-2 p-4">
-                {isAuthenticated ? (
+                {currentUser ? (
                   <>
                     <NavLink href="/dashboard/student">
                       <LayoutDashboard className="mr-2 h-5 w-5" /> Dashboard

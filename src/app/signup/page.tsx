@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
@@ -23,6 +23,8 @@ import { Loader2, UserPlus, Mail, KeyRound, UserCircle2, BrainCircuit } from 'lu
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { signUpUser } from '@/actions/auth';
+import { auth } from '@/lib/firebase'; // Import Firebase auth
+import { onAuthStateChanged } from 'firebase/auth';
 
 const signUpFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -40,6 +42,18 @@ export default function SignUpPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push('/dashboard/student'); // Redirect if already logged in
+      } else {
+        setIsCheckingAuth(false);
+      }
+    });
+    return () => unsubscribe(); // Cleanup subscription on unmount
+  }, [router]);
 
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(signUpFormSchema),
@@ -68,7 +82,7 @@ export default function SignUpPage() {
         title: "Account Created!",
         description: result.message || "You can now sign in with your new account.",
       });
-      router.push('/signin');
+      router.push('/signin'); // Redirect to sign-in page after successful signup
     } else {
       toast({
         variant: "destructive",
@@ -78,6 +92,14 @@ export default function SignUpPage() {
     }
     setIsLoading(false);
   };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.16))]">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.16))] bg-muted/40 py-8 px-4 sm:px-6 lg:px-8">
@@ -109,7 +131,7 @@ export default function SignUpPage() {
                             id="name"
                             placeholder="Your Name"
                             {...field}
-                            className={cn("pl-10 text-sm sm:text-base", errors.name ? 'border-destructive' : '')}
+                            className={cn("pl-10 text-base sm:text-sm", errors.name ? 'border-destructive' : '')}
                           />
                         )}
                       />
@@ -130,7 +152,7 @@ export default function SignUpPage() {
                             type="email"
                             placeholder="you@example.com"
                             {...field}
-                            className={cn("pl-10 text-sm sm:text-base", errors.email ? 'border-destructive' : '')}
+                            className={cn("pl-10 text-base sm:text-sm", errors.email ? 'border-destructive' : '')}
                           />
                         )}
                       />
@@ -151,7 +173,7 @@ export default function SignUpPage() {
                             type="password"
                             placeholder="Min. 6 characters"
                             {...field}
-                            className={cn("pl-10 text-sm sm:text-base", errors.password ? 'border-destructive' : '')}
+                            className={cn("pl-10 text-base sm:text-sm", errors.password ? 'border-destructive' : '')}
                           />
                         )}
                       />
@@ -172,7 +194,7 @@ export default function SignUpPage() {
                             type="password"
                             placeholder="Re-enter password"
                             {...field}
-                            className={cn("pl-10 text-sm sm:text-base", errors.confirmPassword ? 'border-destructive' : '')}
+                            className={cn("pl-10 text-base sm:text-sm", errors.confirmPassword ? 'border-destructive' : '')}
                           />
                         )}
                       />
@@ -201,7 +223,7 @@ export default function SignUpPage() {
           </div>
 
           {/* Image Section */}
-          <div className="flex order-first lg:order-last items-center justify-center bg-gradient-to-br from-primary/5 via-accent/5 to-background p-6 sm:p-8 md:p-12 relative">
+          <div className="hidden lg:flex order-first lg:order-last items-center justify-center bg-gradient-to-br from-primary/5 via-accent/5 to-background p-6 sm:p-8 md:p-12 relative">
             <Image
               src="https://img.freepik.com/premium-vector/woman-with-laptop-showing_126609-931.jpg?w=740"
               alt="Illustration of a person signing up"

@@ -1,70 +1,29 @@
 
 'use server';
 
-import bcrypt from 'bcryptjs';
-import fs from 'fs/promises';
-import path from 'path';
-import { randomUUID } from 'crypto';
-
-// Define the path for the local users JSON file
-const USERS_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'users.json');
-const DATA_DIR_PATH = path.join(process.cwd(), 'src', 'data');
-
-interface LocalUser {
-  id: string;
-  name: string;
-  email: string;
-  password?: string; // Hashed password
-}
+import { auth, db } from '@/lib/firebase';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  updateProfile as updateFirebaseProfile // Renamed to avoid conflict
+} from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 interface AuthResponse {
   success: boolean;
   message: string;
-  user?: { id: string; name: string; email: string };
+  user?: { 
+    id: string; 
+    name: string | null; // Firebase displayName can be null
+    email: string | null; // Firebase email can be null
+  };
+  error?: { code?: string; message: string };
 }
 
-// Helper function to ensure the data directory and users.json file exist
-async function ensureUsersFile(): Promise<void> {
-  try {
-    await fs.mkdir(DATA_DIR_PATH, { recursive: true });
-  } catch (error: any) {
-    if (error.code !== 'EEXIST') {
-      console.error('Failed to create data directory:', error);
-      throw new Error('Server setup error: Could not create data directory.');
-    }
-  }
-
-  try {
-    await fs.access(USERS_FILE_PATH);
-  } catch (error) {
-    // File doesn't exist, create it with an empty array
-    await fs.writeFile(USERS_FILE_PATH, JSON.stringify([]), 'utf-8');
-    console.log('Created users.json file.');
-  }
-}
-
-// Helper function to read users from the JSON file
-async function readUsers(): Promise<LocalUser[]> {
-  await ensureUsersFile();
-  try {
-    const data = await fs.readFile(USERS_FILE_PATH, 'utf-8');
-    return JSON.parse(data) as LocalUser[];
-  } catch (error) {
-    console.error('Error reading users file:', error);
-    // If file is corrupt or empty, treat as empty list and try to recover by overwriting later
-    return [];
-  }
-}
-
-// Helper function to write users to the JSON file
-async function writeUsers(users: LocalUser[]): Promise<void> {
-  await ensureUsersFile();
-  try {
-    await fs.writeFile(USERS_FILE_PATH, JSON.stringify(users, null, 2), 'utf-8');
-  } catch (error) {
-    console.error('Error writing users file:', error);
-    throw new Error('Failed to save user data.');
-  }
+interface UserProfile {
+  name: string;
+  email: string;
+  createdAt: Date;
 }
 
 export async function signUpUser(formData: FormData): Promise<AuthResponse> {
@@ -80,44 +39,41 @@ export async function signUpUser(formData: FormData): Promise<AuthResponse> {
   }
 
   try {
-    console.log("Attempting to sign up user with local storage...");
-    const users = await readUsers();
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const firebaseUser = userCredential.user;
 
-    const existingUser = users.find(user => user.email.toLowerCase() === email.toLowerCase());
-    if (existingUser) {
-      return { success: false, message: 'User with this email already exists.' };
-    }
+    // Update Firebase Auth profile with display name
+    await updateFirebaseProfile(firebaseUser, { displayName: name });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const userId = randomUUID();
-
-    const newUser: LocalUser = {
-      id: userId,
-      name,
-      email: email.toLowerCase(),
-      password: hashedPassword,
-    };
-
-    users.push(newUser);
-    await writeUsers(users);
-    console.log("New user saved successfully to local store:", newUser.email);
+    // Store additional user information in Firestore
+    const userRef = doc(db, 'users', firebaseUser.uid);
+    await setDoc(userRef, {
+      name: name,
+      email: firebaseUser.email,
+      createdAt: new Date(),
+    });
 
     return {
       success: true,
       message: 'User registered successfully!',
-      user: { id: newUser.id, name: newUser.name, email: newUser.email },
+      user: { 
+        id: firebaseUser.uid, 
+        name: firebaseUser.displayName, 
+        email: firebaseUser.email 
+      },
     };
   } catch (error: any) {
-    console.error('🔴 Sign up error in server action (local storage):');
-    console.error('Message:', error.message);
-    console.error('Stack:', error.stack);
-    
-    let userMessage = 'An unexpected error occurred during sign up. Please try again.';
-    if (error.message.includes('Failed to save user data') || error.message.includes('Could not create data directory')) {
-        userMessage = 'Server error saving user information. Please try again later.';
+    console.error('🔴 Firebase Sign Up Error:', error);
+    // Firebase errors often have a 'code' property, e.g., 'auth/email-already-in-use'
+    let message = 'An unexpected error occurred during sign up.';
+    if (error.code === 'auth/email-already-in-use') {
+      message = 'This email is already registered. Please sign in or use a different email.';
+    } else if (error.code === 'auth/weak-password') {
+      message = 'The password is too weak. Please choose a stronger password.';
+    } else if (error.message) {
+      message = error.message;
     }
-    
-    return { success: false, message: userMessage };
+    return { success: false, message: message, error: { code: error.code, message: error.message } };
   }
 }
 
@@ -130,41 +86,32 @@ export async function signInUser(formData: FormData): Promise<AuthResponse> {
   }
 
   try {
-    console.log("Attempting to sign in user with local storage...");
-    const users = await readUsers();
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const firebaseUser = userCredential.user;
 
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    
-    if (!user) {
-      return { success: false, message: 'Invalid email or password.' };
-    }
+    // Optionally, you could fetch additional user data from Firestore here if needed
+    // For now, Firebase Auth's user object is usually sufficient for basic info.
+    // const userDocRef = doc(db, "users", firebaseUser.uid);
+    // const userDoc = await getDoc(userDocRef);
+    // const userName = userDoc.exists() ? userDoc.data().name : firebaseUser.displayName;
 
-    if (!user.password) {
-        console.error("User account incomplete - password field missing from local store for:", email);
-        return { success: false, message: 'User account incomplete. Please contact support.' };
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return { success: false, message: 'Invalid email or password.' };
-    }
-
-    console.log("User signed in successfully from local store:", user.email);
     return {
       success: true,
       message: 'Signed in successfully!',
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { 
+        id: firebaseUser.uid, 
+        name: firebaseUser.displayName, // Or fetched name from Firestore
+        email: firebaseUser.email 
+      },
     };
   } catch (error: any) {
-    console.error('🔴 Sign in error in server action (local storage):');
-    console.error('Message:', error.message);
-    console.error('Stack:', error.stack);
-
-    let userMessage = 'An unexpected error occurred during sign in. Please try again.';
-    if (error.message.includes('Failed to read user data')) { // This would be from readUsers if JSON is corrupt
-        userMessage = 'Server error reading user information. Please try again later.';
+    console.error('🔴 Firebase Sign In Error:', error);
+    let message = 'An unexpected error occurred during sign in.';
+    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+      message = 'Invalid email or password.';
+    } else if (error.message) {
+      message = error.message;
     }
-    
-    return { success: false, message: userMessage };
+    return { success: false, message: message, error: { code: error.code, message: error.message } };
   }
 }
