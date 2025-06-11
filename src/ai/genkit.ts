@@ -5,46 +5,60 @@ import { config as dotenvConfig } from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 
-// Attempt to load .env from src/.env as a fallback if it exists there.
-// Next.js automatically loads .env files from the project root.
-// This explicit load is primarily for robustness if the key was placed in src/.env
-// and to ensure it's loaded before Genkit initializes in server-side contexts.
-const srcEnvPath = path.resolve(process.cwd(), 'src', '.env');
-if (fs.existsSync(srcEnvPath)) {
-  dotenvConfig({ path: srcEnvPath });
-  console.log(`Attempted to load environment variables from ${srcEnvPath}`);
+// Explicitly load .env from project root first if present.
+// Next.js handles this automatically, but this ensures dotenv is used consistently
+// if there's any loading order ambiguity with other manual dotenv loads.
+// However, typically, you'd rely solely on Next.js's built-in .env loading.
+// For this specific debugging, let's be very explicit.
+
+const rootEnvPath = path.resolve(process.cwd(), '.env');
+if (fs.existsSync(rootEnvPath)) {
+  console.log(`Attempting to load environment variables from project root .env: ${rootEnvPath}`);
+  dotenvConfig({ path: rootEnvPath, override: true }); // override: true ensures this takes precedence if called multiple times
 } else {
-  // If src/.env doesn't exist, we rely on Next.js's default root .env loading.
-  console.log('src/.env not found. Relying on Next.js default .env loading (ensure .env is in project root).');
+  console.log(`Project root .env file not found at: ${rootEnvPath}. Relying on Next.js default .env loading or other .env files.`);
 }
 
-const apiKey = process.env.GOOGLE_API_KEY;
-const placeholderKey = "YOUR_GEMINI_API_KEY_PLEASE_REPLACE_ME"; // Keep your placeholder or use a generic one
+// Then, check for src/.env as a potential secondary or specific override location (less common for root config)
+const srcEnvPath = path.resolve(process.cwd(), 'src', '.env');
+if (fs.existsSync(srcEnvPath)) {
+  console.log(`Attempting to load environment variables from src/.env: ${srcEnvPath}`);
+  dotenvConfig({ path: srcEnvPath, override: true }); // override: true ensures this applies if src/.env has different values
+}
 
-if (!apiKey || apiKey === placeholderKey || apiKey === "AIzaSyAuDRBC0TSTJI1juTAsFfkhinKC8XWPOXg_NEEDS_REPLACEMENT") { // Added a generic placeholder check too
-  let message = '\n🔴 CRITICAL ERROR: GOOGLE_API_KEY environment variable is not correctly configured or is a placeholder.\n';
-  if (!apiKey) {
-    message += 'It appears to be MISSING entirely from the environment variables available to the server.\n';
-  } else if (apiKey === placeholderKey || apiKey === "AIzaSyAuDRBC0TSTJI1juTAsFfkhinKC8XWPOXg_NEEDS_REPLACEMENT") {
-    message += `It is currently set to a default placeholder value: "${apiKey}".\n`;
-  }
-  message += 'AI-powered features (Employability Score, Recommendations, Pathways) WILL NOT WORK until this is resolved.\n\n';
-  message += 'Troubleshooting Steps:\n';
-  message += '1. Ensure you have a file named ".env" in the ROOT directory of your project (same level as package.json).\n';
-  message += '2. Inside ".env", make sure you have the line: GOOGLE_API_KEY=YOUR_ACTUAL_API_KEY (replace with your real, valid key).\n';
-  message += '   If you believe "AIzaSyAuDRBC0TSTJI1juTAsFfkhinKC8XWPOXg" is your key, ensure it\'s correctly set without typos and is valid for the Gemini API.\n';
-  message += '3. VERY IMPORTANT: Restart your Next.js development server (npm run dev) after creating or modifying the .env file.\n';
-  console.error(message); // Use console.error for critical issues
-  // Consider throwing an error here to prevent the app from starting with a broken AI config,
-  // though for now, a strong console error is provided.
+console.log("Environment variable GOOGLE_API_KEY at the point of access in genkit.ts:", process.env.GOOGLE_API_KEY);
+
+const apiKey = process.env.GOOGLE_API_KEY;
+const placeholderKey = "YOUR_GEMINI_API_KEY_PLEASE_REPLACE_ME";
+const placeholderKey2 = "AIzaSyAuDRBC0TSTJI1juTAsFfkhinKC8XWPOXg_NEEDS_REPLACEMENT"; // Another common placeholder
+
+let criticalErrorMessage = "";
+
+if (!apiKey) {
+  criticalErrorMessage = '\n🔴 CRITICAL ERROR: GOOGLE_API_KEY environment variable is MISSING or UNDEFINED.\n';
+} else if (apiKey === placeholderKey || apiKey === placeholderKey2) {
+  criticalErrorMessage = `\n🔴 CRITICAL ERROR: GOOGLE_API_KEY is set to a PLACEHOLDER value: "${apiKey}".\n`;
+}
+
+if (criticalErrorMessage) {
+  criticalErrorMessage += 'AI-powered features (Employability Score, Recommendations, Pathways) WILL NOT WORK until this is resolved.\n\n';
+  criticalErrorMessage += 'Troubleshooting Steps:\n';
+  criticalErrorMessage += '1. Ensure you have a file named ".env" in the ROOT directory of your project (same level as package.json).\n';
+  criticalErrorMessage += '2. Inside this root ".env" file, make sure you have the line: GOOGLE_API_KEY=YOUR_ACTUAL_API_KEY (replace with your real, valid key).\n';
+  criticalErrorMessage += '   - Do NOT use quotes around your API key unless the key itself contains quotes.\n';
+  criticalErrorMessage += '   - Ensure there are no leading/trailing spaces.\n';
+  criticalErrorMessage += '3. If you also have a "src/.env" file, ensure it either also contains the correct GOOGLE_API_KEY or remove the key from "src/.env" to avoid conflicts, letting the root ".env" be the source of truth.\n';
+  criticalErrorMessage += '4. VERY IMPORTANT: Restart your Next.js development server (e.g., `npm run dev`) after creating or modifying any .env file.\n';
+  console.error(criticalErrorMessage);
+  // Forcing an error here might be too disruptive for startup, but the console error should be prominent.
   // throw new Error("CRITICAL: GOOGLE_API_KEY is not configured correctly. AI features will fail.");
 } else {
-  console.log("🟢 GOOGLE_API_KEY found in environment. Genkit will attempt to use it.");
+  console.log("🟢 GOOGLE_API_KEY found in environment and is not a known placeholder. Genkit will attempt to use it:", apiKey ? apiKey.substring(0, 4) + '...' + apiKey.substring(apiKey.length - 4) : "undefined");
 }
 
 export const ai = genkit({
   plugins: [
     googleAI({ apiKey: apiKey }), // Explicitly pass the API key
   ],
-  model: 'googleai/gemini-2.0-flash',
+  // model: 'googleai/gemini-2.0-flash', // Consider updating to 'gemini-1.5-flash-latest' or similar if issues persist beyond API key
 });

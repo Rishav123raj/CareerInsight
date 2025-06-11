@@ -1,4 +1,3 @@
-
 [
   {
     "id": "af779ecf-d68c-4023-9c7c-05c960174e47",
@@ -13,5 +12,19 @@
     "email": "infoojhaabhishek@gmail.com",
     "password": "$2a$10$gfp/OV.AyLajgTdhmZLc0erUCIXWlwLH2WwVYPmVhl.R69c5ZKuTy",
     "createdAt": "2024-01-02T12:00:00.000Z"
+  },
+  {
+    "id": "83a2dce1-0d65-462a-a312-38a1693bc7c7",
+    "name": "abcd",
+    "email": "abcd@gmail.com",
+    "password": "$2a$10$IoLtrn3CGMBKPjtPSgAx2eVgTMEVZdr.W573Lu3miUquQCH0PVRRy",
+    "createdAt": "2025-06-09T19:32:33.628Z"
+  },
+  {
+    "id": "155ec8b8-9566-49fc-be92-8c9f2f8272b6",
+    "name": "Demo123",
+    "email": "demo@gmail.com",
+    "password": "$2a$10$qrAzMnvPVTMTzaGaV6B1yO60Gx/Kyr3.Sgr.6LAft91KQHLFORbsa",
+    "createdAt": "2025-06-11T05:05:43.853Z"
   }
 ]
