@@ -58,7 +58,7 @@ if (criticalErrorMessage) {
 
 export const ai = genkit({
   plugins: [
-    googleAI({ apiKey: apiKey }), // Explicitly pass the API key
+    googleAI({ apiKey: apiKey }), 
   ],
-  // model: 'googleai/gemini-2.0-flash', // Consider updating to 'gemini-1.5-flash-latest' or similar if issues persist beyond API key
+  model: 'googleai/gemini-2.0-flash',
 });

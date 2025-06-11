@@ -40,13 +40,12 @@ import {
   BookMarked,
   Youtube,
   Link as LinkIcon,
-  // Save icon removed as profile saving is removed for local auth
 } from 'lucide-react';
 import type {
   ProfileFormData,
-  CareerRecommendation, // This is CareerRecommendationsOutput from the flow
-  CareerPathway,       // This is SuggestCareerPathwaysOutput from the flow
-  EmployabilityScore,  // This is CalculateEmployabilityScoreOutput from the flow
+  CareerRecommendationsOutput, // Updated type name
+  CareerPathway,
+  EmployabilityScore,
   GitHubAnalyticsData,
   LeetCodeAnalyticsData,
   CommitHistoryData,
@@ -54,7 +53,7 @@ import type {
   LeetCodeDailyActivityData,
   LearningResource,
   ResourceType,
-} from '@/lib/types'; // Ensure CareerRecommendation type matches flow output
+} from '@/lib/types';
 import { generateCareerRecommendations } from '@/ai/flows/generate-career-recommendations';
 import { suggestCareerPathways } from '@/ai/flows/suggest-career-pathways';
 import { calculateEmployabilityScore } from '@/ai/flows/calculate-employability-score';
@@ -191,9 +190,8 @@ export default function CareerPredictorPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  // isSavingProfile state removed as profile saving is removed for local auth
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
-  const [recommendations, setRecommendations] = useState<CareerRecommendation | null>(null);
+  const [recommendations, setRecommendations] = useState<CareerRecommendationsOutput | null>(null);
   const [pathways, setPathways] = useState<CareerPathway | null>(null);
   const [employabilityScore, setEmployabilityScore] = useState<EmployabilityScore | null>(null);
   const [gitHubData, setGitHubData] = useState<GitHubAnalyticsData | null>(null);
@@ -201,20 +199,15 @@ export default function CareerPredictorPage() {
   const [githubUsernameForAnalytics, setGithubUsernameForAnalytics] = useState<string | null>(null);
   const [leetcodeUsernameForAnalytics, setLeetcodeUsernameForAnalytics] = useState<string | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
-  // currentUser state related to Firebase auth removed
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: defaultProfileValues,
   });
 
-  const { control, handleSubmit, reset, formState: { errors } } = form; // isDirty removed
-
-  // fetchProfileData and saveProfile logic removed as it was tied to Firebase
-  // currentUser state logic removed
+  const { control, handleSubmit, reset, formState: { errors } } = form;
 
   useEffect(() => {
-    // Revert to localStorage check for authentication
     const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
     if (!isAuthenticated) {
       router.push('/signin');
@@ -235,8 +228,6 @@ export default function CareerPredictorPage() {
     setGithubUsernameForAnalytics(data.coding.githubUsername || null);
     setLeetcodeUsernameForAnalytics(data.coding.codingPlatformUsername || null);
 
-    // Profile saving logic removed
-
     const academicPerformanceSummary = `CGPA: ${data.academic.cgpa}, Major: ${data.academic.major}. Strengths: ${data.academic.academicStrengths}. Weaknesses: ${data.academic.academicWeaknesses}.`;
     const codingSkillsSummary = `Languages & Frameworks: ${data.coding.programmingLanguages}. Notable Projects: ${data.coding.keyProjects}. GitHub: ${data.coding.githubUsername || 'N/A'}. Coding Platform (${data.coding.codingPlatformUsername || 'N/A'}): ${data.coding.codingPlatformStats || 'N/A'}.`;
     const extracurricularActivitiesSummary = `Certifications: ${data.extracurricular.certifications || 'N/A'}. Events: ${data.extracurricular.eventsParticipated || 'N/A'}. Hackathons: ${data.extracurricular.hackathonExperience || 'N/A'}. Leadership: ${data.extracurricular.leadershipRoles || 'N/A'}.`;
@@ -254,7 +245,7 @@ export default function CareerPredictorPage() {
         }),
         suggestCareerPathways({
           academicPerformance: academicPerformanceSummary,
-          codingStats: problemSolvingSkillsSummary, // Ensure this maps correctly
+          codingStats: problemSolvingSkillsSummary,
           extracurricularActivities: extracurricularActivitiesSummary,
           skills: data.skills,
         }),
@@ -408,7 +399,6 @@ export default function CareerPredictorPage() {
             </Card>
 
             <div className="flex flex-col gap-3 sm:gap-4">
-              {/* Save Profile Button Removed */}
               <Button type="submit" disabled={isLoading || isLoadingAnalytics} className="w-full text-sm sm:text-base py-3 sm:py-4 md:py-6">
                 {(isLoading || isLoadingAnalytics) ? (
                   <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
@@ -606,7 +596,7 @@ export default function CareerPredictorPage() {
                           <ChartLegend content={<ChartLegendContent />} />
                           <Bar dataKey="solved" radius={3}>
                             {leetCodeData.solvedByDifficulty.map((entry, index) => (
-                               <div key={`cell-${index}`} style={{ backgroundColor: entry.level === 'Easy' ? 'hsl(var(--chart-2))' : entry.level === 'Medium' ? 'hsl(var(--chart-3))' : 'hsl(var(--chart-4))' }} />
+                               <rect key={`cell-${index}`} fill={entry.level === 'Easy' ? 'var(--color-easy)' : entry.level === 'Medium' ? 'var(--color-medium)' : 'var(--color-hard)'} />
                             ))}
                           </Bar>
                         </BarChart>
@@ -694,3 +684,4 @@ const CustomProgress = React.forwardRef<
   );
 });
 CustomProgress.displayName = "CustomProgress";
+

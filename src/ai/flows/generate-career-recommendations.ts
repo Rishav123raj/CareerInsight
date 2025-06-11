@@ -32,11 +32,14 @@ const LearningResourceSchema = z.object({
   url: z.string().optional().describe("A URL to the resource. Ensure URLs are functional and directly relevant. For books/PDFs, this may not always be a direct link but a source. For YouTube, link to the video or channel."),
   description: z.string().optional().describe("A brief description, or a hint on where to find it (e.g., 'Official documentation', 'Search on Project Gutenberg', 'Available on university open courseware'). This is especially useful if a direct URL is not specific or for broader book suggestions.")
 });
+export type LearningResource = z.infer<typeof LearningResourceSchema>;
+
 
 const RecommendationItemSchema = z.object({
     action: z.string().describe("A specific, actionable recommendation for the student."),
     suggestedResources: z.array(LearningResourceSchema).min(1).max(3).describe("A list of 1-3 suggested learning resources (courses, books/PDFs, YouTube videos/channels) that directly help implement the 'action'. Provide valid URLs where possible. For books/PDFs, prioritize open-access materials or well-known titles and indicate where to find them if a direct URL isn't available.")
 });
+export type RecommendationItem = z.infer<typeof RecommendationItemSchema>;
 
 const CareerRecommendationsOutputSchema = z.object({
   recommendations: z
@@ -44,6 +47,7 @@ const CareerRecommendationsOutputSchema = z.object({
     .describe('A list of personalized recommendations, each with an action and a list of structured suggested learning resources.'),
   suggestedRoles: z
     .array(z.string())
+    .optional() // Made optional to handle cases where AI might not return it
     .describe('A list of potential job roles based on the user profile.'),
 });
 export type CareerRecommendationsOutput = z.infer<typeof CareerRecommendationsOutputSchema>;
@@ -86,7 +90,7 @@ const prompt = ai.definePrompt({
     - type: "course", title: "Full-Stack Open - Part 2: Communicating with server", url: "https://fullstackopen.com/en/part2/communicating_with_server", description: "Covers React interactions with backends."
     - type: "book/pdf", title: "React Official Documentation - Thinking in React", url: "https://react.dev/learn/thinking-in-react", description: "Essential reading from the official React docs."
 
-  3. A list of suggested job roles that align with the student's profile.
+  3. A list of suggested job roles that align with the student's profile. This field is named 'suggestedRoles'. If no specific roles come to mind, provide an empty list for 'suggestedRoles'.
 
   Return the output strictly in the specified JSON format matching the output schema. Ensure all provided URLs are as valid and direct as possible. Prioritize quality and relevance of resources.
   `,
@@ -105,8 +109,6 @@ const generateCareerRecommendationsFlow = ai.defineFlow(
         console.error("Input that caused no output:", JSON.stringify(input, null, 2));
         throw new Error("AI failed to generate career recommendations. No output received from model. Check server logs.");
     }
-    // Zod schema validation will still parse the 'url' as a string.
-    // If strict URL format validation is needed *after* AI response, it could be done here manually.
     return output;
   }
 );

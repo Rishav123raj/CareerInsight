@@ -26,5 +26,12 @@
     "email": "demo@gmail.com",
     "password": "$2a$10$qrAzMnvPVTMTzaGaV6B1yO60Gx/Kyr3.Sgr.6LAft91KQHLFORbsa",
     "createdAt": "2025-06-11T05:05:43.853Z"
+  },
+  {
+    "id": "3e2bc72f-1fb3-4179-b95e-62c636210e69",
+    "name": "RRB",
+    "email": "rrb@gmail.com",
+    "password": "$2a$10$XVaDYPG6BfAY6vsQTfLQlO3gl/m4zAzRJf8suLln2rUAUk7JZjbIS",
+    "createdAt": "2025-06-11T05:20:32.262Z"
   }
 ]
