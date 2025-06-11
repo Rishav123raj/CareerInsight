@@ -1,5 +1,5 @@
 
-# CareerInsight: AI-Powered Career Guidance Platform
+# CareerInsight: Bridging Employability Gaps
 
 **CareerInsight** is a Next.js web application designed to help students and recent graduates navigate their career paths more effectively. It leverages Artificial Intelligence (powered by Google's Gemini models via Genkit) to provide personalized feedback on employability, suggest tailored career recommendations, and outline potential career pathways.
 
